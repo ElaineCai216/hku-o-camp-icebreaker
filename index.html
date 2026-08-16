@@ -527,8 +527,8 @@
         <li>胜负：手指先扣完的人淘汰，坚持到最后未出局的人获胜。</li>
         <li>禁忌：禁止说「我有眼睛」「我吃饭了」等全民皆有的事，也禁止瞎编虚构经历，违者按吹牛处理。</li>
       </ol>
-      <div style="margin-top:18px">
-        <h3 style="font-size:17px">💡 示例句</h3>
+      <div style="margin-top:18px" id="nhyyExamples">
+        <h3 style="font-size:17px" id="nhyyExHead">💡 示例句</h3>
         <div class="example">「我试过坐叮叮车由头坐到尾」</div>
         <div class="example">「我亲眼见过一次「鬼火」（或说一个你觉得最邪门的香港传说）」</div>
         <div class="example">「我没用过八达通就敢搭港铁」</div>
@@ -1545,6 +1545,136 @@ $("#resetAll").addEventListener("click", () => {
   location.reload();
 });
 
+/* ---------------- 内容配置：content.md（GitHub 后台可改） ---------------- */
+// 单条文字 key -> 元素映射（content.md 里同名 key 会覆盖对应文字）
+const EDITABLES = [
+  {key:"brand.name", sel:"#brand b"},
+  {key:"brand.tag", sel:"#brand small"},
+  {key:"btn.full", sel:"#btnFull .lbl"},
+  {key:"btn.settings", sel:"#btnSettings .lbl"},
+  {key:"home.kicker", sel:"#view-home .kicker"},
+  {key:"home.title", sel:"#homeTitle"},
+  {key:"home.sub", sel:"#view-home .sec-head p"},
+  {key:"home.card1.t", sel:"#view-home .gcard h2", idx:0},
+  {key:"home.card1.d", sel:"#view-home .gcard p", idx:0},
+  {key:"home.card1.tag", sel:"#view-home .gcard .tag", idx:0},
+  {key:"home.card2.t", sel:"#view-home .gcard h2", idx:1},
+  {key:"home.card2.d", sel:"#view-home .gcard p", idx:1},
+  {key:"home.card2.tag", sel:"#view-home .gcard .tag", idx:1},
+  {key:"home.card3.t", sel:"#view-home .gcard h2", idx:2},
+  {key:"home.card3.d", sel:"#view-home .gcard p", idx:2},
+  {key:"home.card3.tag", sel:"#view-home .gcard .tag", idx:2},
+  {key:"home.namesBtn", sel:"#view-home [data-go=names]"},
+  {key:"home.hint", sel:"#view-home .hint"},
+  {key:"names.kicker", sel:"#view-names .kicker"},
+  {key:"names.title", sel:"#view-names .sec-head h1"},
+  {key:"names.sub", sel:"#view-names .sec-head p"},
+  {key:"names.panel", sel:"#view-names .panel h3"},
+  {key:"names.add", sel:"#nameAdd"},
+  {key:"names.bulk", sel:"#nameBulk"},
+  {key:"names.clear", sel:"#nameClear"},
+  {key:"names.shuffle", sel:"#nameShuffle"},
+  {key:"intro.kicker", sel:"#view-intro .kicker"},
+  {key:"intro.title", sel:"#view-intro .sec-head h1"},
+  {key:"intro.sub", sel:"#view-intro .sec-head p"},
+  {key:"rules.head1", sel:"#view-intro .panel h3"},
+  {key:"intro.spin", sel:"#introSpin"},
+  {key:"intro.next", sel:"#introNext"},
+  {key:"intro.reset", sel:"#introReset"},
+  {key:"games.kicker", sel:"#view-games .kicker"},
+  {key:"games.title", sel:"#view-games .sec-head h1"},
+  {key:"games.sub", sel:"#view-games .sec-head p"},
+  {key:"games.tab1", sel:"#view-games .tab", idx:0},
+  {key:"games.tab2", sel:"#view-games .tab", idx:1},
+  {key:"rules.head2", sel:"#sub-flower .panel h3"},
+  {key:"flower.start", sel:"#flowerStart"},
+  {key:"flower.stop", sel:"#flowerStop"},
+  {key:"rules.head3", sel:"#sub-garden .panel h3"},
+  {key:"garden.catsub", sel:"#sub-garden .cat-sub"},
+  {key:"garden.catSpin", sel:"#catSpin"},
+  {key:"garden.catNext", sel:"#gardenCatNext"},
+  {key:"garden.start", sel:"#gardenStart"},
+  {key:"garden.pause", sel:"#gardenPause"},
+  {key:"garden.fail", sel:"#gardenFail"},
+  {key:"q.head", sel:"#view-games > .panel h3"},
+  {key:"q.sub", sel:"#view-games > .panel .sub"},
+  {key:"q.spin", sel:"#qSpin"},
+  {key:"nhyy.kicker", sel:"#view-nhyy .kicker"},
+  {key:"nhyy.title", sel:"#view-nhyy .sec-head h1"},
+  {key:"nhyy.sub", sel:"#view-nhyy .sec-head p"},
+  {key:"nhyy.rulesHead", sel:"#view-nhyy .panel h3"},
+  {key:"nhyy.exHead", sel:"#nhyyExHead"},
+  {key:"q.reveal", sel:"#qReveal"},
+  {key:"q.next", sel:"#qNext"},
+  {key:"q.done", sel:"#qClose2"},
+  {key:"set.title", sel:"#setModal .sec-head h1"},
+  {key:"set.g0", sel:"#setModal .set-group h4", idx:0},
+  {key:"set.g1", sel:"#setModal .set-group h4", idx:1},
+  {key:"set.g2", sel:"#setModal .set-group h4", idx:2},
+  {key:"set.g3", sel:"#setModal .set-group h4", idx:3},
+  {key:"set.g4", sel:"#setModal .set-group h4", idx:4},
+  {key:"set.g5", sel:"#setModal .set-group h4", idx:5},
+  {key:"set.done", sel:"#setDone"}
+];
+function applyTexts(t){
+  EDITABLES.forEach(e => {
+    const v = t[e.key]; if (v == null) return;
+    const els = e.sel.startsWith("#") ? [document.querySelector(e.sel)] : [...document.querySelectorAll(e.sel)];
+    const el = e.idx != null ? els[e.idx] : els[0];
+    if (el) el.textContent = Array.isArray(v) ? v[0] : v;
+  });
+  if (Array.isArray(t["intro.rules"])) renderRules("#view-intro .rules", t["intro.rules"]);
+  if (Array.isArray(t["flower.rules"])) renderRules("#sub-flower .rules", t["flower.rules"]);
+  if (Array.isArray(t["garden.rules"])) renderRules("#sub-garden .rules", t["garden.rules"]);
+  if (Array.isArray(t["nhyy.rules"])) renderRules("#view-nhyy .rules", t["nhyy.rules"]);
+  if (Array.isArray(t["nhyy.examples"])) renderExamples(t["nhyy.examples"]);
+}
+function renderRules(sel, items){
+  const ol = document.querySelector(sel); if (!ol) return;
+  ol.innerHTML = "";
+  items.forEach(txt => { const li = document.createElement("li"); li.textContent = txt; ol.append(li); });
+}
+function renderExamples(items){
+  const box = document.getElementById("nhyyExamples"); if (!box) return;
+  box.innerHTML = "";
+  items.forEach(txt => { const d = document.createElement("div"); d.className = "example"; d.textContent = txt; box.append(d); });
+}
+function parseContent(txt){
+  const texts = {}, prompts = [], questions = [], cats = [];
+  txt.split(/\r?\n/).forEach(line => {
+    line = line.trim();
+    if (!line || line.startsWith("#")) return;
+    const eq = line.indexOf("=");
+    if (eq < 0) return;
+    const key = line.slice(0, eq).trim();
+    const val = line.slice(eq + 1).trim();
+    if (key === "prompt"){ prompts.push(val); return; }
+    if (key === "category"){ cats.push(val); return; }
+    if (key === "question"){
+      let tag = "", body = val;
+      if (body.startsWith("[情境]")){ tag = "情境题"; body = body.slice(4).trim(); }
+      const bar = body.indexOf("|");
+      questions.push(bar >= 0 ? {q: body.slice(0, bar).trim(), a: body.slice(bar + 1).trim(), t: tag} : {q: body, a: "", t: tag});
+      return;
+    }
+    if (!texts[key]) texts[key] = [val]; else texts[key].push(val);
+  });
+  return {texts, prompts, questions, cats};
+}
+async function loadContent(){
+  try{
+    const res = await fetch("content.md", {cache: "no-store"});
+    if (!res.ok) return;
+    const c = parseContent(await res.text());
+    applyTexts(c.texts);
+    if (c.prompts.length) state.prompts = c.prompts;
+    if (c.questions.length) state.questions = c.questions;
+    if (c.cats.length) state.cats = c.cats;
+    renderNames(); renderIntro(); renderFlower(); renderGarden(); renderQWheel();
+    console.log("content.md loaded");
+  }catch(e){ /* 离线或读取失败：使用内置默认内容 */ }
+}
+
 /* ---------------- 全局点击/悬停音效 ---------------- */
 document.addEventListener("click", e => {
   const t = e.target.closest("button, .gcard, .tab, .chip, .tile");
@@ -1561,6 +1691,8 @@ document.addEventListener("pointerover", e => {
 
 /* ---------------- 键盘快捷键 ---------------- */
 document.addEventListener("keydown", e => {
+  const ae = document.activeElement;
+  if (ae && (ae.isContentEditable || ae.tagName === "INPUT" || ae.tagName === "TEXTAREA")) return;
   const qOpen = $("#qModal").classList.contains("open");
   const sOpen = $("#setModal").classList.contains("open");
   if (e.key === "Escape"){ if (qOpen) closeQ(); if (sOpen) closeSettings(); return; }
@@ -1615,6 +1747,7 @@ addEventListener("resize", () => {
 
 function init(){
   FX.init();
+  loadContent();
   renderNames(); renderIntro(); renderFlower(); renderGarden(); renderQWheel();
   updateTopButtons();
   document.getElementById("sub-flower").style.display = "";
