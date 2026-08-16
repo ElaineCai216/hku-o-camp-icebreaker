@@ -1,6 +1,7 @@
 # 港岛树洞 · 异闻录 — O-Camp 破冰大屏
 
 香港大学迎新营破冰活动的大屏主持工具。单文件、离线可用、双击即开。
+网址：https://github.com/ElaineCai216/hku-o-camp-icebreaker
 
 ## 三个环节
 
