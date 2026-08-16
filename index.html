@@ -1,0 +1,1591 @@
+<!doctype html>
+<html lang="zh-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>港岛树洞 · 异闻录 — O-Camp 破冰大屏</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='50%25' cy='40%25' r='60%25'%3E%3Cstop offset='0%25' stop-color='%23f5c542'/%3E%3Cstop offset='55%25' stop-color='%23d62976'/%3E%3Cstop offset='100%25' stop-color='%236d28d9'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='46' fill='url(%23g)'/%3E%3Cpath d='M50 14v16M86 50H70M14 50h16M50 86V70M77 77l-10-10M23 77l10-10M77 23L67 33M23 23l10 10' stroke='%23fff' stroke-width='5' stroke-linecap='round' opacity='.85'/%3E%3Ccircle cx='50' cy='50' r='15' fill='%2306040d'/%3E%3Ccircle cx='50' cy='50' r='9' fill='%23f5c542'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg0:#06040d; --bg1:#0c0718; --bg2:#140b26;
+    --ink:#f4efff; --muted:#a79cc4; --faint:#6f6490;
+    --violet:#8b5cf6; --purple:#6d28d9; --magenta:#d62976; --pink:#f472b6;
+    --cyan:#22d3ee; --gold:#f5c542; --jade:#34d399; --red:#fb7185;
+    --line:rgba(139,92,246,.28); --line2:rgba(214,41,118,.35);
+    --card:rgba(20,11,38,.72);
+    --serif:"Songti SC","STSong","Noto Serif SC","Source Han Serif SC",Georgia,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang HK","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Segoe UI",sans-serif;
+    --ease:cubic-bezier(.22,1,.36,1);
+    --r-lg:26px; --r-md:18px; --r-sm:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:var(--sans); color:var(--ink);
+    background:
+      radial-gradient(1100px 720px at 82% -10%, rgba(109,40,217,.34), transparent 60%),
+      radial-gradient(900px 700px at -10% 108%, rgba(214,41,118,.22), transparent 58%),
+      radial-gradient(760px 560px at 108% 90%, rgba(34,211,238,.10), transparent 55%),
+      var(--bg0);
+    min-height:100%; overflow-x:hidden; -webkit-font-smoothing:antialiased;
+    position:relative;
+  }
+  /* ---------- global FX ---------- */
+  #fx{position:fixed;inset:0;z-index:0;pointer-events:none}
+  .vignette{
+    position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:radial-gradient(120% 120% at 50% 50%, transparent 55%, rgba(0,0,0,.55) 100%);
+  }
+  .noise{
+    position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .scroll{position:absolute;left:0;right:0;height:2px;opacity:.5}
+  /* ---------- topbar ---------- */
+  #topbar{
+    position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;gap:10px;
+    padding:12px 18px;
+    background:linear-gradient(180deg, rgba(6,4,13,.85), rgba(6,4,13,.25) 80%, transparent);
+    backdrop-filter:blur(6px);
+  }
+  #brand{display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;margin-right:auto}
+  #brand .orb{width:34px;height:34px;flex:none;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #f5c542, #d62976 55%, #6d28d9);
+    box-shadow:0 0 18px rgba(214,41,118,.65);position:relative;animation:orbSpin 14s linear infinite}
+  #brand .orb::after{content:"";position:absolute;inset:9px;border-radius:50%;background:#06040d;
+    border:1px dashed rgba(245,197,66,.8)}
+  @keyframes orbSpin{to{transform:rotate(360deg)}}
+  #brand b{font-family:var(--serif);font-size:16px;letter-spacing:.06em;text-shadow:0 0 14px rgba(139,92,246,.8)}
+  #brand small{display:block;font-size:10px;color:var(--muted);letter-spacing:.3em;margin-top:2px}
+  .tbtn{
+    position:relative;display:inline-flex;align-items:center;gap:7px;padding:9px 14px;border:1px solid var(--line);
+    border-radius:999px;background:rgba(20,11,38,.55);color:var(--ink);font:inherit;font-size:13px;font-weight:600;
+    cursor:pointer;transition:transform .18s var(--ease),border-color .2s,box-shadow .2s,background .2s;
+  }
+  .tbtn:hover{transform:translateY(-2px);border-color:var(--violet);box-shadow:0 6px 24px rgba(139,92,246,.35);background:rgba(30,18,56,.8)}
+  .tbtn:active{transform:scale(.94)}
+  .tbtn.off{opacity:.55;border-color:rgba(139,92,246,.16)}
+  .tbtn .ico{font-size:15px;line-height:1}
+  /* ---------- app / views ---------- */
+  #app{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:86px 22px 60px;min-height:100vh}
+  .view{display:none}
+  .view.active{display:block;animation:viewIn .5s var(--ease)}
+  @keyframes viewIn{from{opacity:0;transform:translateY(22px) scale(.985)}to{opacity:1;transform:none}}
+  .sec-head{margin:6px 0 26px;text-align:center}
+  .kicker{
+    display:inline-block;font-size:11px;font-weight:800;letter-spacing:.42em;color:var(--gold);
+    text-transform:uppercase;text-shadow:0 0 16px rgba(245,197,66,.55);
+  }
+  .sec-head h1{font-family:var(--serif);font-size:42px;line-height:1.15;margin:10px 0 6px;text-shadow:0 0 26px rgba(139,92,246,.55)}
+  .sec-head p{color:var(--muted);font-size:14px}
+  .back-row{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .back-row .crumb{color:var(--faint);font-size:12px;letter-spacing:.2em}
+  /* ---------- buttons ---------- */
+  .btn{
+    position:relative;display:inline-flex;align-items:center;justify-content:center;gap:9px;
+    padding:13px 26px;border:none;border-radius:999px;font:inherit;font-size:15px;font-weight:700;
+    cursor:pointer;color:var(--ink);overflow:hidden;
+    background:linear-gradient(135deg, rgba(139,92,246,.9), rgba(109,40,217,.9));
+    box-shadow:0 8px 28px rgba(109,40,217,.4), inset 0 1px 0 rgba(255,255,255,.18);
+    transition:transform .16s var(--ease),box-shadow .2s;
+  }
+  .btn:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 14px 40px rgba(139,92,246,.55), inset 0 1px 0 rgba(255,255,255,.22)}
+  .btn:active{transform:scale(.95)}
+  .btn.gold{background:linear-gradient(135deg,#f5c542,#e07b1f);color:#2a1400;box-shadow:0 8px 28px rgba(224,123,31,.4)}
+  .btn.pink{background:linear-gradient(135deg,#d62976,#8b1e6b);box-shadow:0 8px 28px rgba(214,41,118,.4)}
+  .btn.cyan{background:linear-gradient(135deg,#22d3ee,#0e7490);color:#03141c;box-shadow:0 8px 28px rgba(34,211,238,.35)}
+  .btn.ghost{background:rgba(20,11,38,.6);border:1px solid var(--line);box-shadow:none}
+  .btn.ghost:hover{border-color:var(--violet);box-shadow:0 8px 24px rgba(139,92,246,.3)}
+  .btn.big{padding:18px 38px;font-size:18px;border-radius:22px}
+  .btn.small{padding:8px 16px;font-size:13px}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+  /* ---------- cards ---------- */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px}
+  .gcard{
+    position:relative;border:1px solid var(--line);border-radius:var(--r-lg);
+    background:linear-gradient(160deg, rgba(30,18,56,.85), rgba(14,8,30,.85));
+    padding:30px 26px;cursor:pointer;overflow:hidden;min-height:230px;
+    transition:transform .3s var(--ease),border-color .3s,box-shadow .3s;
+  }
+  .gcard::before{
+    content:"";position:absolute;inset:0;opacity:0;transition:opacity .3s;
+    background:radial-gradient(600px 300px at 50% 0%, rgba(139,92,246,.28), transparent 70%);
+  }
+  .gcard:hover{transform:translateY(-8px) rotateX(2deg);border-color:var(--violet);box-shadow:0 24px 60px rgba(80,40,160,.45)}
+  .gcard:hover::before{opacity:1}
+  .gcard .glyph{
+    width:74px;height:74px;border-radius:22px;display:flex;align-items:center;justify-content:center;
+    font-size:38px;margin-bottom:18px;position:relative;
+    background:linear-gradient(145deg, rgba(139,92,246,.28), rgba(214,41,118,.18));
+    border:1px solid var(--line2);box-shadow:0 0 30px rgba(214,41,118,.25);
+    animation:glyphFloat 5s ease-in-out infinite;
+  }
+  @keyframes glyphFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(3deg)}}
+  .gcard h2{font-family:var(--serif);font-size:26px;margin-bottom:8px;text-shadow:0 0 18px rgba(139,92,246,.5)}
+  .gcard p{color:var(--muted);font-size:14px;line-height:1.7;min-height:44px}
+  .gcard .tag{
+    display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:5px 12px;border-radius:999px;
+    font-size:12px;font-weight:700;color:var(--gold);background:rgba(245,197,66,.1);border:1px solid rgba(245,197,66,.3);
+  }
+  .gcard .arrow{position:absolute;right:22px;bottom:18px;font-size:22px;color:var(--faint);transition:transform .3s var(--ease),color .3s}
+  .gcard:hover .arrow{transform:translateX(6px);color:var(--gold)}
+  /* ---------- panels ---------- */
+  .panel{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);
+    padding:26px;margin-bottom:20px;position:relative;overflow:hidden;
+    box-shadow:0 16px 50px rgba(0,0,0,.35);
+  }
+  .panel h3{font-family:var(--serif);font-size:22px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+  .panel h3 .dot{width:10px;height:10px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px var(--gold);flex:none}
+  .panel .sub{color:var(--muted);font-size:13px;line-height:1.7;margin-bottom:14px}
+  .rules{list-style:none;counter-reset:r;display:flex;flex-direction:column;gap:12px}
+  .rules li{
+    counter-increment:r;position:relative;padding:14px 16px 14px 52px;border-radius:var(--r-md);
+    background:rgba(139,92,246,.07);border:1px solid rgba(139,92,246,.16);font-size:15px;line-height:1.7;
+    animation:ruleIn .5s var(--ease) backwards;
+  }
+  .rules li::before{
+    content:counter(r,decimal-leading-zero);position:absolute;left:14px;top:50%;transform:translateY(-50%);
+    font-family:var(--serif);font-weight:700;font-size:18px;color:var(--gold);
+    text-shadow:0 0 12px rgba(245,197,66,.6);
+  }
+  @keyframes ruleIn{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
+  .example{
+    display:inline-flex;gap:8px;align-items:flex-start;padding:12px 16px;margin:8px 8px 0 0;border-radius:var(--r-sm);
+    background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.22);color:#bdf1fb;font-size:14px;line-height:1.6;
+  }
+  /* ---------- names manager ---------- */
+  .name-input-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .field{
+    flex:1;min-width:200px;padding:13px 16px;border-radius:var(--r-md);border:1px solid var(--line);
+    background:rgba(10,6,22,.7);color:var(--ink);font:inherit;font-size:15px;outline:none;
+    transition:border-color .2s,box-shadow .2s;
+  }
+  .field:focus{border-color:var(--violet);box-shadow:0 0 0 3px rgba(139,92,246,.22)}
+  textarea.field{min-height:130px;resize:vertical;line-height:1.7}
+  .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .chip{
+    position:relative;display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;
+    border:1px solid var(--line);background:rgba(139,92,246,.1);font-size:14px;font-weight:600;cursor:pointer;
+    transition:transform .16s var(--ease),border-color .2s,box-shadow .2s;
+    animation:chipIn .35s var(--ease) backwards;
+  }
+  .chip:hover{transform:translateY(-2px) scale(1.03);border-color:var(--violet);box-shadow:0 6px 18px rgba(139,92,246,.3)}
+  .chip .x{color:var(--faint);font-size:13px;line-height:1;padding:3px;border-radius:50%;transition:color .2s,transform .2s}
+  .chip .x:hover{color:var(--red);transform:scale(1.3)}
+  @keyframes chipIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+  .hint{color:var(--faint);font-size:12px;margin-top:10px;line-height:1.6}
+  /* ---------- picker / game stage ---------- */
+  .stage{
+    position:relative;border:1px solid var(--line);border-radius:var(--r-lg);
+    background:radial-gradient(700px 380px at 50% 0%, rgba(109,40,217,.25), rgba(10,6,22,.6) 70%);
+    padding:30px;min-height:420px;overflow:hidden;
+  }
+  .stage-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+  .stage-title{font-family:var(--serif);font-size:24px;display:flex;align-items:center;gap:10px}
+  .stage-title .live{width:9px;height:9px;border-radius:50%;background:var(--jade);box-shadow:0 0 12px var(--jade);animation:blink 1.2s infinite}
+  @keyframes blink{50%{opacity:.25}}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:14px}
+  .tile{
+    position:relative;padding:20px 10px;border-radius:var(--r-md);text-align:center;font-size:16px;font-weight:700;
+    background:rgba(20,11,38,.7);border:1px solid var(--line);overflow:hidden;word-break:break-all;
+    transition:transform .18s var(--ease),border-color .2s,box-shadow .2s,background .2s;
+  }
+  .tile .no{display:block;font-size:10px;color:var(--faint);font-weight:600;letter-spacing:.14em;margin-bottom:4px}
+  .tile.hot{
+    background:linear-gradient(145deg, rgba(214,41,118,.55), rgba(109,40,217,.55));
+    border-color:var(--magenta);transform:scale(1.12);z-index:2;
+    box-shadow:0 0 34px rgba(214,41,118,.75), inset 0 0 18px rgba(255,255,255,.18);
+  }
+  .tile.picked{background:linear-gradient(145deg, rgba(245,197,66,.5), rgba(224,123,31,.5));border-color:var(--gold);
+    box-shadow:0 0 40px rgba(245,197,66,.7);transform:scale(1.1)}
+  .tile.used{opacity:.32;filter:grayscale(.7)}
+  .stage-actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:26px}
+  .spotlight{
+    position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .4s;
+    background:radial-gradient(420px 260px at var(--x,50%) var(--y,20%), rgba(245,197,66,.16), transparent 70%);
+  }
+  .stage.spinning .spotlight{opacity:1;animation:spotMove 1.1s ease-in-out infinite alternate}
+  @keyframes spotMove{from{--x:18%;--y:22%}to{--x:82%;--y:74%}}
+  /* ---------- big reveal ---------- */
+  .reveal-card{
+    text-align:center;padding:46px 34px;border-radius:var(--r-lg);position:relative;overflow:hidden;
+    background:linear-gradient(160deg, rgba(40,20,80,.9), rgba(16,8,36,.95));
+    border:1px solid var(--line2);
+    box-shadow:0 0 80px rgba(214,41,118,.25), inset 0 0 60px rgba(109,40,217,.18);
+  }
+  .reveal-card .who{font-size:64px;font-weight:800;font-family:var(--serif);line-height:1.2;margin:10px 0 4px;
+    text-shadow:0 0 34px rgba(245,197,66,.75);animation:whoIn .6s var(--ease)}
+  @keyframes whoIn{0%{opacity:0;transform:scale(.6) rotate(-4deg)}60%{transform:scale(1.08)}100%{opacity:1;transform:none}}
+  .reveal-card .who-sub{color:var(--muted);font-size:14px;letter-spacing:.3em;margin-bottom:8px}
+  .prompt{
+    display:inline-block;margin-top:18px;padding:14px 22px;border-radius:var(--r-md);
+    background:rgba(139,92,246,.14);border:1px solid rgba(139,92,246,.35);font-size:19px;line-height:1.7;
+    animation:promptIn .5s var(--ease) .15s backwards;
+  }
+  @keyframes promptIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  /* ---------- question modal ---------- */
+  .modal{
+    position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;padding:24px;
+    background:rgba(4,2,10,.78);backdrop-filter:blur(8px);
+  }
+  .modal.open{display:flex;animation:fadeIn .3s}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .modal-card{
+    width:100%;max-width:860px;max-height:88vh;overflow:auto;border-radius:var(--r-lg);position:relative;
+    background:linear-gradient(165deg, rgba(36,18,76,.97), rgba(12,6,28,.97));
+    border:1px solid var(--line2);padding:34px;text-align:center;
+    box-shadow:0 0 100px rgba(109,40,217,.4);animation:modalIn .4s var(--ease);
+  }
+  @keyframes modalIn{from{opacity:0;transform:scale(.85) translateY(24px)}to{opacity:1;transform:none}}
+  .modal-card .m-close{
+    position:absolute;top:14px;right:16px;width:38px;height:38px;border-radius:50%;border:1px solid var(--line);
+    background:rgba(20,11,38,.7);color:var(--muted);font-size:16px;cursor:pointer;transition:all .2s;
+  }
+  .modal-card .m-close:hover{color:var(--ink);border-color:var(--red);transform:rotate(90deg)}
+  .q-tag{display:inline-block;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:800;letter-spacing:.2em;
+    color:#0a2a33;background:linear-gradient(135deg,#22d3ee,#67e8f9);margin-bottom:14px}
+  .q-tag.gold{color:#2a1400;background:linear-gradient(135deg,#f5c542,#e07b1f)}
+  .q-text{font-family:var(--serif);font-size:32px;line-height:1.5;margin:18px 0 8px;min-height:120px;
+    text-shadow:0 0 22px rgba(139,92,246,.4)}
+  .q-group{color:var(--faint);font-size:12px;letter-spacing:.24em;margin-bottom:6px}
+  .answer{
+    display:none;margin:20px auto 0;max-width:640px;padding:20px 24px;border-radius:var(--r-md);
+    background:rgba(245,197,66,.1);border:1px solid rgba(245,197,66,.4);color:#ffe9ad;font-size:19px;line-height:1.8;
+    animation:answerIn .5s var(--ease);
+  }
+  .answer.show{display:block}
+  @keyframes answerIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+  .q-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:26px}
+  /* ---------- countdown ring ---------- */
+  .cd-wrap{display:flex;flex-direction:column;align-items:center;gap:18px;padding:16px 0 6px}
+  .ring{position:relative;width:190px;height:190px}
+  .ring svg{width:190px;height:190px;transform:rotate(-90deg)}
+  .ring .track{fill:none;stroke:rgba(139,92,246,.18);stroke-width:10}
+  .ring .fill{fill:none;stroke:url(#ringGrad);stroke-width:10;stroke-linecap:round;
+    stroke-dasharray:528;stroke-dashoffset:0;transition:stroke-dashoffset .25s linear}
+  .ring .num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-family:var(--serif);font-size:64px;font-weight:700;text-shadow:0 0 26px rgba(245,197,66,.6)}
+  .ring .lbl{position:absolute;left:50%;top:74%;transform:translateX(-50%);font-size:12px;color:var(--muted);letter-spacing:.3em}
+  .cat-name{font-family:var(--serif);font-size:52px;line-height:1.2;text-shadow:0 0 30px rgba(214,41,118,.65);
+    animation:catIn .45s var(--ease)}
+  @keyframes catIn{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+  .cat-sub{color:var(--muted);font-size:14px;margin-top:6px}
+  .tabs{display:inline-flex;gap:6px;padding:6px;border-radius:999px;background:rgba(10,6,22,.7);border:1px solid var(--line)}
+  .tab{
+    padding:10px 22px;border:none;border-radius:999px;background:transparent;color:var(--muted);
+    font:inherit;font-size:15px;font-weight:700;cursor:pointer;transition:all .25s var(--ease);
+  }
+  .tab.active{background:linear-gradient(135deg,#d62976,#8b1e6b);color:#fff;box-shadow:0 6px 20px rgba(214,41,118,.45)}
+  /* ---------- toast ---------- */
+  #toast{
+    position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(20px);z-index:120;
+    padding:14px 26px;border-radius:999px;background:rgba(30,18,56,.92);border:1px solid var(--line2);
+    color:var(--ink);font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:all .35s var(--ease);
+    box-shadow:0 10px 40px rgba(0,0,0,.5), 0 0 30px rgba(214,41,118,.3);
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  /* ---------- settings ---------- */
+  .set-group{margin-bottom:22px;text-align:left}
+  .set-group h4{font-size:14px;letter-spacing:.14em;color:var(--gold);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .set-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0}
+  .mini-chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:12px;
+    background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.3)}
+  .mini-chip button{border:none;background:none;color:var(--red);cursor:pointer;font-size:13px}
+  .mini-chip button:hover{transform:scale(1.25)}
+  .divider{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin:20px 0}
+  .row-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:24px}
+  .fancy-file{position:relative;overflow:hidden}
+  .fancy-file input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+  .sound-bars{display:inline-flex;align-items:flex-end;gap:3px;height:16px}
+  .sound-bars i{width:3px;border-radius:2px;background:var(--cyan);animation:bars 1s ease-in-out infinite}
+  .sound-bars i:nth-child(2){animation-delay:.15s}.sound-bars i:nth-child(3){animation-delay:.3s}
+  .sound-bars i:nth-child(4){animation-delay:.45s}
+  @keyframes bars{0%,100%{height:4px}50%{height:16px}}
+  /* ---------- misc ---------- */
+  .empty{text-align:center;color:var(--faint);padding:44px 10px;font-size:15px;line-height:1.9}
+  .empty .big{font-size:44px;display:block;margin-bottom:12px;animation:floaty 3s ease-in-out infinite}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  .kbd{display:inline-block;padding:2px 8px;border-radius:6px;border:1px solid var(--line);background:rgba(20,11,38,.8);
+    font-size:11px;color:var(--muted);font-family:var(--sans)}
+  .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;font-size:12px;font-weight:800;
+    background:rgba(214,41,118,.16);border:1px solid rgba(214,41,118,.4);color:var(--pink)}
+  @media (max-width:720px){
+    #app{padding:76px 14px 40px}
+    .sec-head h1{font-size:30px}
+    .reveal-card .who{font-size:44px}
+    .q-text{font-size:24px}
+    .cat-name{font-size:36px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  }
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+<div class="vignette"></div><div class="noise"></div>
+
+<header id="topbar">
+  <div id="brand"><div class="orb"></div><div><b>港岛树洞 · 异闻录</b><small>O-CAMP ICEBREAKER</small></div></div>
+  <button class="tbtn" id="btnMusic"><span class="ico">🎵</span><span class="lbl">音乐</span></button>
+  <button class="tbtn" id="btnSfx"><span class="ico">🔊</span><span class="lbl">音效</span></button>
+  <button class="tbtn" id="btnFull"><span class="ico">⛶</span><span class="lbl">全屏</span></button>
+  <button class="tbtn" id="btnSettings"><span class="ico">⚙️</span><span class="lbl">设置</span></button>
+</header>
+
+<main id="app">
+  <!-- HOME -->
+  <section class="view active" id="view-home">
+    <div class="sec-head">
+      <span class="kicker">香港大学 · 迎新营</span>
+      <h1 id="homeTitle">港岛树洞·异闻录</h1>
+      <p>2026.9.1 – 9.6 · 校园 / 香港 / 别墅　|　破冰活动大屏工具</p>
+    </div>
+    <div class="cards">
+      <div class="gcard" data-go="intro">
+        <div class="glyph">👻</div>
+        <h2>自我介绍</h2>
+        <p>大转盘随机点名，抽中的人按提示题介绍自己，让全场快速记住你。</p>
+        <span class="tag">大转盘 · 提示题</span><span class="arrow">→</span>
+      </div>
+      <div class="gcard" data-go="games">
+        <div class="glyph">🥁</div>
+        <h2>逛三园 / 击鼓传花</h2>
+        <p>传花停到谁、逛三园接不上谁，就要转动大转盘抽取惩罚题回答！</p>
+        <span class="tag">双玩法 · 大转盘答题</span><span class="arrow">→</span>
+      </div>
+      <div class="gcard" data-go="nhyy">
+        <div class="glyph">🙌</div>
+        <h2>你有我没有</h2>
+        <p>浓缩完整规则大屏展示，全员真人玩手指，线下进行不记分。</p>
+        <span class="tag">规则展示</span><span class="arrow">→</span>
+      </div>
+    </div>
+    <div class="row-actions" style="margin-top:26px">
+      <button class="btn ghost" data-go="names">👥 名单管理</button>
+    </div>
+    <p class="hint" style="text-align:center;margin-top:18px">提示：活动开始前先把名单录入，所有环节都能用 · 数据仅保存在本机浏览器</p>
+  </section>
+
+  <!-- NAMES -->
+  <section class="view" id="view-names">
+    <div class="back-row"><button class="btn ghost small" data-go="home">← 返回</button><span class="crumb">名单管理</span></div>
+    <div class="sec-head"><span class="kicker">Participants</span><h1>名单管理</h1><p>添加 / 编辑 / 删除参与者姓名，所有环节实时同步</p></div>
+    <div class="panel">
+      <h3><span class="dot"></span>添加姓名</h3>
+      <div class="name-input-row">
+        <input class="field" id="nameInput" placeholder="输入姓名，回车添加" maxlength="12">
+        <button class="btn gold" id="nameAdd">＋ 添加</button>
+      </div>
+      <textarea class="field" id="namePaste" style="margin-top:12px" placeholder="也可以一次粘贴一整份名单：每行一个名字，然后点「批量导入」"></textarea>
+      <div class="name-input-row" style="margin-top:12px">
+        <button class="btn cyan small" id="nameBulk">📋 批量导入</button>
+        <button class="btn ghost small" id="nameClear">🗑 清空全部</button>
+        <button class="btn ghost small" id="nameShuffle">🔀 随机排序</button>
+      </div>
+      <div class="chips" id="nameChips"></div>
+      <p class="hint" id="nameCount"></p>
+    </div>
+  </section>
+
+  <!-- INTRO -->
+  <section class="view" id="view-intro">
+    <div class="back-row"><button class="btn ghost small" data-go="home">← 返回</button><span class="crumb">自我介绍</span></div>
+    <div class="sec-head"><span class="kicker">Ice Breaker · 01</span><h1>自我介绍 · 大转盘点名</h1><p>点击「转动转盘」，指针停下的人上台，按提示题做自我介绍</p></div>
+    <div class="panel">
+      <h3><span class="dot"></span>玩法规则</h3>
+      <ol class="rules">
+        <li>转动大转盘，指针停到谁，谁就上台。</li>
+        <li>按屏幕上的提示题介绍自己（也可换成下一题）。</li>
+        <li>抽过的人自动标记「已介绍」，可一键重置。</li>
+      </ol>
+    </div>
+    <div class="stage" id="introStage">
+      <div class="spotlight"></div>
+      <div class="stage-top">
+        <div class="stage-title">🧿 异闻点名罗盘 <span class="live"></span></div>
+        <span class="badge" id="introCount">已介绍 0 / 0</span>
+      </div>
+      <div id="introWheel" class="wheel-host"></div>
+      <div class="reveal-card" id="introReveal" style="display:none;margin-top:22px">
+        <div class="who-sub">✦ 恭喜被点名 ✦</div>
+        <div class="who" id="introWho">—</div>
+        <div class="prompt" id="introPrompt"></div>
+      </div>
+      <div class="stage-actions">
+        <button class="btn big gold" id="introSpin">🎡 转动转盘</button>
+        <button class="btn ghost" id="introNext">🔄 换一题</button>
+        <button class="btn ghost" id="introReset">♻️ 重置已介绍</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- GAMES -->
+  <section class="view" id="view-games">
+    <div class="back-row"><button class="btn ghost small" data-go="home">← 返回</button><span class="crumb">逛三园 / 击鼓传花</span></div>
+    <div class="sec-head"><span class="kicker">Ice Breaker · 02</span><h1>逛三园 / 击鼓传花</h1><p>双玩法可切换 · 被传到或接不上的人，转动大转盘抽取惩罚题</p></div>
+    <div class="row-actions" style="margin-bottom:18px"><div class="tabs">
+      <button class="tab active" data-tab="flower">🥁 击鼓传花</button>
+      <button class="tab" data-tab="garden">🌳 逛三园</button>
+    </div></div>
+
+    <div class="subview" id="sub-flower">
+      <div class="panel">
+        <h3><span class="dot"></span>玩法规则</h3>
+        <ol class="rules">
+          <li>点击「开始传花」，鼓点响起，「花」在名字间快速传递。</li>
+          <li>喊停（或按 <span class="kbd">空格</span>）时，花停在谁身上，谁就上台。</li>
+          <li>被传到的同学转动大转盘抽取惩罚题并回答。</li>
+        </ol>
+      </div>
+      <div class="stage" id="flowerStage">
+        <div class="spotlight"></div>
+        <div class="stage-top">
+          <div class="stage-title">🥁 击鼓传花 <span class="live" id="flowerLive"></span></div>
+          <div>
+            <span class="sound-bars" id="flowerBars" style="display:none"><i></i><i></i><i></i><i></i></span>
+            <span class="badge" id="flowerCount">0 / 0</span>
+          </div>
+        </div>
+        <div class="grid" id="flowerGrid"></div>
+        <div class="stage-actions">
+          <button class="btn big pink" id="flowerStart">🥁 开始传花</button>
+          <button class="btn ghost" id="flowerStop" disabled>⏹ 停止</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="subview" id="sub-garden" style="display:none">
+      <div class="panel">
+        <h3><span class="dot"></span>玩法规则</h3>
+        <ol class="rules">
+          <li>屏幕显示类别（如「动物园」），每人轮流说出一个该类别的事物，不能重复。</li>
+          <li>倒计时结束还接不上，或说了重复/错误的，即被淘汰。</li>
+          <li>淘汰的同学转动大转盘抽取惩罚题并回答。</li>
+        </ol>
+      </div>
+      <div class="stage" id="gardenStage">
+        <div class="stage-top">
+          <div class="stage-title">🌳 逛三园 <span class="live" id="gardenLive"></span></div>
+          <button class="btn ghost small" id="gardenCatNext">🎲 换类别</button>
+        </div>
+        <div class="cd-wrap">
+          <div class="cat-name" id="gardenCat">动物园</div>
+          <div class="cat-sub">轮流接龙 · 不许重复 · 接不上就转盘答题</div>
+          <div class="ring">
+            <svg viewBox="0 0 190 190">
+              <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#f5c542"/><stop offset=".5" stop-color="#d62976"/><stop offset="1" stop-color="#8b5cf6"/>
+              </linearGradient></defs>
+              <circle class="track" cx="95" cy="95" r="84"></circle>
+              <circle class="fill" id="cdFill" cx="95" cy="95" r="84"></circle>
+            </svg>
+            <div class="num" id="cdNum">10</div>
+            <div class="lbl">秒</div>
+          </div>
+        </div>
+        <div class="stage-actions">
+          <button class="btn big cyan" id="gardenStart">⏱ 开始倒计时</button>
+          <button class="btn ghost" id="gardenPause">⏸ 暂停</button>
+          <button class="btn pink" id="gardenFail">❌ 有人接不上 → 转盘答题</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:22px">
+      <h3><span class="dot"></span>🎡 大转盘 · 抽取惩罚题</h3>
+      <p class="sub">被传到 / 接不上的人，转动下方大转盘抽取一道惩罚题；指针停下后自动弹出题目，由主持人决定是否揭晓答案。</p>
+      <div id="qWheel" class="wheel-host"></div>
+      <div class="stage-actions">
+        <button class="btn big gold" id="qSpin">🎡 转动转盘抽题</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- NHYY -->
+  <section class="view" id="view-nhyy">
+    <div class="back-row"><button class="btn ghost small" data-go="home">← 返回</button><span class="crumb">你有我没有</span></div>
+    <div class="sec-head"><span class="kicker">Ice Breaker · 03</span><h1>你有我没有</h1><p>全员真人玩手指 · 线下进行 · 不记分</p></div>
+    <div class="panel">
+      <h3><span class="dot"></span>浓缩完整规则</h3>
+      <ol class="rules">
+        <li>准备：每人伸出十根手指（或 10 个筹码），顺时针轮流发言。</li>
+        <li>发言：轮到你时，说一件「我自己做过/拥有，但觉得你们大多没有」的事（必须真实）。</li>
+        <li>判定「有人有，有人没有」→ 没有的人折 1 指（最常见）。</li>
+        <li>判定「所有人都有（含发言者）」→ 发言者猜错，自折 1 指。</li>
+        <li>判定「只有发言者有（其他人全没有）」→ 发言者自折 2 指（防止故意说冷门）。</li>
+        <li>判定「发言者自己根本没有（吹牛）」→ 发言者直接出局（扣光所有手指）。</li>
+        <li>胜负：手指先扣完的人淘汰，坚持到最后未出局的人获胜。</li>
+        <li>禁忌：禁止说「我有眼睛」「我吃饭了」等全民皆有的事，也禁止瞎编虚构经历，违者按吹牛处理。</li>
+      </ol>
+      <div style="margin-top:18px">
+        <h3 style="font-size:17px">💡 示例句</h3>
+        <div class="example">「我试过坐叮叮车由头坐到尾」</div>
+        <div class="example">「我亲眼见过一次「鬼火」（或说一个你觉得最邪门的香港传说）」</div>
+        <div class="example">「我没用过八达通就敢搭港铁」</div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- question modal -->
+<div class="modal" id="qModal">
+  <div class="modal-card">
+    <button class="m-close" id="qClose">✕</button>
+    <div class="q-group" id="qGroup">惩罚题</div>
+    <div><span class="q-tag" id="qTag">随机</span></div>
+    <div class="q-text" id="qText">—</div>
+    <div class="answer" id="qAnswer"></div>
+    <div class="q-actions">
+      <button class="btn ghost" id="qReveal">👁 揭晓答案</button>
+      <button class="btn gold" id="qNext">下一题 🎡</button>
+      <button class="btn ghost" id="qClose2">完成 ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- settings modal -->
+<div class="modal" id="setModal">
+  <div class="modal-card" style="max-width:760px;text-align:left">
+    <button class="m-close" id="setClose">✕</button>
+    <div class="sec-head"><span class="kicker">Settings</span><h1 style="font-size:30px">设置与管理</h1></div>
+    <div class="set-group">
+      <h4>🎼 音乐与音效</h4>
+      <div class="set-row">
+        <button class="btn ghost small" id="setMusic">🎵 音乐：开</button>
+        <button class="btn ghost small" id="setSfx">🔊 音效：开</button>
+        <label class="btn ghost small fancy-file">📁 上传背景音乐<input type="file" id="musicFile" accept="audio/*"></label>
+        <button class="btn ghost small" id="musicRemove">🗑 移除上传音乐</button>
+        <span class="hint" id="musicHint" style="margin:0">内置合成节拍</span>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="set-group">
+      <h4>⏱ 逛三园倒计时（秒）</h4>
+      <div class="set-row">
+        <button class="btn ghost small" id="cdMinus">−</button>
+        <span class="badge" id="cdVal">10 秒</span>
+        <button class="btn ghost small" id="cdPlus">＋</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="set-group">
+      <h4>📝 自我介绍提示题库（每行一条）</h4>
+      <textarea class="field" id="editPrompts" style="min-height:140px"></textarea>
+      <button class="btn cyan small" style="margin-top:10px" id="savePrompts">💾 保存提示题库</button>
+    </div>
+    <div class="divider"></div>
+    <div class="set-group">
+      <h4>🎡 惩罚题库（格式：问题 | 答案，每行一题）</h4>
+      <textarea class="field" id="editQuestions" style="min-height:200px"></textarea>
+      <button class="btn cyan small" style="margin-top:10px" id="saveQuestions">💾 保存题库</button>
+      <button class="btn ghost small" style="margin-top:10px" id="restoreQuestions">↩️ 恢复默认题库</button>
+      <p class="hint">情境题用前缀 [情境] 标记：<span class="kbd">[情境] 问题 | 答案</span></p>
+    </div>
+    <div class="divider"></div>
+    <div class="set-group">
+      <h4>🌳 逛三园类别（每行一条）</h4>
+      <textarea class="field" id="editCats" style="min-height:120px"></textarea>
+      <button class="btn cyan small" style="margin-top:10px" id="saveCats">💾 保存类别</button>
+    </div>
+    <div class="divider"></div>
+    <div class="set-group">
+      <h4>🛠 数据</h4>
+      <div class="set-row">
+        <button class="btn ghost small" id="exportData">📤 导出数据</button>
+        <button class="btn ghost small" id="importData">📥 导入数据<input type="file" id="importFile" accept="application/json" style="display:none"></button>
+        <button class="btn ghost small" id="resetAll" style="border-color:rgba(251,113,133,.5);color:#fb7185">⚠️ 重置全部数据</button>
+      </div>
+    </div>
+    <div class="row-actions"><button class="btn gold" id="setDone">完成 ✓</button></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<style>
+  /* ---------- big wheel ---------- */
+  .wheel-host{position:relative;width:min(100%,560px);margin:16px auto;aspect-ratio:1;touch-action:none;user-select:none}
+  .wheel-canvas{width:100%;height:100%;display:block;border-radius:50%}
+  .wheel-rim{position:absolute;inset:-6px;border-radius:50%;pointer-events:none;
+    border:6px solid rgba(245,197,66,.7);
+    box-shadow:0 0 60px rgba(214,41,118,.45), 0 0 26px rgba(109,40,217,.6), inset 0 0 34px rgba(109,40,217,.35);
+    animation:rimGlow 3s ease-in-out infinite}
+  @keyframes rimGlow{0%,100%{box-shadow:0 0 40px rgba(214,41,118,.35),0 0 20px rgba(109,40,217,.5),inset 0 0 30px rgba(109,40,217,.3)}
+    50%{box-shadow:0 0 70px rgba(214,41,118,.6),0 0 40px rgba(245,197,66,.45),inset 0 0 40px rgba(245,197,66,.25)}}
+  .wheel-pointer{position:absolute;top:-14px;left:50%;transform:translateX(-50%);z-index:6;pointer-events:none;
+    width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-top:30px solid var(--gold);
+    filter:drop-shadow(0 4px 10px rgba(245,197,66,.8));animation:pointerBob 1.6s ease-in-out infinite}
+  .wheel-pointer::after{content:"";position:absolute;top:-34px;left:-10px;width:20px;height:20px;border-radius:50%;
+    background:radial-gradient(circle at 35% 30%,#fff,#f5c542 60%,#e07b1f)}
+  @keyframes pointerBob{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-6px)}}
+  .wheel-hub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:5;pointer-events:none;
+    width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 35% 30%, #3a2260, #0c0718 70%);
+    border:2px solid rgba(245,197,66,.8);
+    box-shadow:0 0 30px rgba(245,197,66,.5), inset 0 0 18px rgba(245,197,66,.25)}
+  .wheel-hub .h-ring{position:absolute;inset:8px;border-radius:50%;border:1px dashed rgba(245,197,66,.55);animation:orbSpin 9s linear infinite}
+  .wheel-hub .h-core{font-size:30px;filter:drop-shadow(0 0 10px rgba(245,197,66,.9));animation:hubPulse 2s ease-in-out infinite}
+  @keyframes hubPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+  .wheel.spinning .wheel-canvas{filter:drop-shadow(0 0 26px rgba(214,41,118,.55))}
+</style>
+<script>
+"use strict";
+/* ============================================================
+   港岛树洞·异闻录 — O-Camp 破冰大屏工具
+   单文件 · 离线 · localStorage + IndexedDB
+   ============================================================ */
+
+/* ---------------- 数据与持久化 ---------------- */
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v==null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+const IDB = {
+  db: null,
+  async open(){
+    if (this.db) return this.db;
+    this.db = await new Promise((res, rej) => {
+      const r = indexedDB.open("hoi-camp", 1);
+      r.onupgradeneeded = () => r.result.createObjectStore("files");
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+    return this.db;
+  },
+  async put(key, val){ const db = await this.open(); return new Promise((res, rej) => {
+    const tx = db.transaction("files","readwrite"); tx.objectStore("files").put(val, key);
+    tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error);
+  });},
+  async get(key){ const db = await this.open(); return new Promise((res, rej) => {
+    const tx = db.transaction("files","readonly"); const rq = tx.objectStore("files").get(key);
+    rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error);
+  });},
+  async del(key){ const db = await this.open(); return new Promise((res, rej) => {
+    const tx = db.transaction("files","readwrite"); tx.objectStore("files").delete(key);
+    tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error);
+  });}
+};
+
+const DEFAULT_QUESTIONS = [
+  {g:"香港生存方法", t:"", q:"初到香港，最值得先办好/充值的交通支付工具是什么？", a:"八达通；地铁、巴士、电车、便利店和不少食堂都可用。"},
+  {g:"香港生存方法", t:"", q:"香港绿顶小巴和红顶小巴最大的区别是什么？", a:"绿小巴有固定路线、站点和票价；红小巴更灵活，但路线、下车点和付款方式更需要先问清楚。"},
+  {g:"香港生存方法", t:"", q:"坐香港巴士快到站时，通常要做什么？", a:"按下车铃；不要默认司机会在每一站停。"},
+  {g:"香港生存方法", t:"", q:"香港电车俗称什么？主要行驶在哪里？", a:"叮叮车；主要在港岛北岸一带行驶。"},
+  {g:"香港生存方法", t:"", q:"坐电车一般从哪里上、哪里下并付款？", a:"通常后门上车、前门下车付款。"},
+  {g:"香港生存方法", t:"", q:"从港岛去九龙，最省心的日常方式通常是什么？", a:"港铁；跨海时优先看港铁路线和换乘时间。"},
+  {g:"香港生存方法", t:"情境题", q:"从香港去深圳，常见的三类方式是什么？", a:"东铁线过罗湖或落马洲口岸、高铁经西九龙、跨境巴士/直通巴。证件、签注及口岸开放安排必须出发前确认。"},
+  {g:"香港生存方法", t:"", q:"经罗湖或落马洲过关后，能直接坐深圳地铁吗？", a:"可以，完成两地出入境手续后，分别可接驳罗湖站或福田口岸站附近的深圳地铁。"},
+  {g:"香港生存方法", t:"", q:"在港岛打市区的士，应找什么颜色的车？", a:"红色的士。"},
+  {g:"香港生存方法", t:"", q:"八达通余额不足时，最实用的处理方法是什么？", a:"尽快在港铁站、便利店等地点增值；不要等到闸口前才发现余额不足。"},
+  {g:"香港生存方法", t:"", q:"香港天气预报中看到八号风球，最重要的动作是什么？", a:"留意学校、交通营办商和政府的即时安排，不要只靠平日班表出行。"},
+  {g:"香港生存方法", t:"", q:"「赌马」在香港属于什么性质的活动？", a:"香港赛马会提供受规管的合法博彩服务，但只限年满 18 岁人士；O Camp 适合把它当作本地文化知识，不应鼓励参与或把投注设计成活动环节。"},
+  {g:"吃饭与省钱", t:"", q:"学生想低价解决一餐，香港最常见的三个方向是什么？", a:"学校食堂、两餸饭、连锁快餐/茶餐厅。"},
+  {g:"吃饭与省钱", t:"", q:"为什么中午高峰不一定适合去「最便宜」的店？", a:"排队时间很长；看似省了饭钱，可能损失大量活动或上课时间。"},
+  {g:"吃饭与省钱", t:"情境题", q:"吉野家、麦当劳、大家乐/大快活一类连锁店的生存价值是什么？", a:"位置容易找、价目清楚、营业时间相对稳定，适合作为赶时间的备选。"},
+  {g:"吃饭与省钱", t:"", q:"去钱大妈等生鲜店买东西前，最该注意什么？", a:"看清当日折扣、保质期和实际是否能及时煮完；便宜不等于适合囤货。"},
+  {g:"吃饭与省钱", t:"", q:"「两餸饭」通常指什么？", a:"自选两样配菜配饭的平价套餐；不同店的菜量、汤和收费规则不同。"},
+  {g:"吃饭与省钱", t:"", q:"在 HKU 周边找高性价比饭店，地图搜索时可以优先用哪几个关键词？", a:"两餸饭、茶餐厅、学生餐、午市套餐、西营盘、坚尼地城。"},
+  {g:"HKU 冷知识", t:"", q:"香港大学成立于哪一年？", a:"1911 年，1912 年正式开学。"},
+  {g:"HKU 冷知识", t:"", q:"HKU 的校训是什么？", a:"Sapientia et Virtus，中文常译为「明德格物」。"},
+  {g:"HKU 冷知识", t:"", q:"HKU Main Building（本部大楼）为什么特别值得打卡？", a:"它是 HKU 最具代表性的早期建筑之一，也是香港法定古迹。"},
+  {g:"HKU 冷知识", t:"", q:"HKU 站是否等于抵达所有 HKU 校园地点？", a:"不是。HKU 有本部、百周年校园、医学相关区域及宿舍等不同地点，出发前要看清具体楼宇和出口。"},
+  {g:"HKU 冷知识", t:"", q:"University Hall（U Hall）原来是什么建筑？", a:"它前身是道格拉斯堡（Douglas Castle），后来成为 HKU 宿舍，历史感很强。"},
+  {g:"HKU 冷知识", t:"", q:"以下缩写各指什么：MB、HW、KKL、RRS？", a:"MB 是 Main Building；HW 是 Haking Wong Building；KKL 是 K. K. Leung Building；RRS 是 Run Run Shaw Building。"},
+  {g:"HKU 冷知识", t:"情境题", q:"为什么不要默认 HKU 每一层都有热水？", a:"校园饮水机不少只提供常温/冷水；热水通常要找 pantry、茶水间、食堂或指定公共空间，并留意开放权限。"},
+  {g:"HKU 冷知识", t:"情境题", q:"在 HKU 急需打印，优先去哪里找？", a:"图书馆、学习共享空间和设有自助打印服务的电脑区域；出发前查 HKU 图书馆或 ITS 最新说明，确认登录方式、付款和开放时间。"},
+  {g:"HKU 冷知识", t:"", q:"HKU 校内适合临时自习的常见地点类别有哪些？", a:"图书馆、Chi Wah Learning Commons、各学院公共学习区、电脑室及部分食堂非用餐高峰时段。"},
+  {g:"HKU 冷知识", t:"", q:"第一次去一栋陌生教学楼，最快的正确做法是什么？", a:"先看课表上的楼宇缩写，再用 HKU 校园地图核对；不要只凭楼名猜位置。"},
+  {g:"HKU 冷知识", t:"", q:"O Camp 队友说「在港大站见」，你还应追问哪两件事？", a:"哪个出口，以及具体哪栋楼/哪个地标；只说「HKU Station」信息不足。"},
+  {g:"HKU 冷知识", t:"情境题", q:"HKU 周边觅食为什么不能只搜「HKU restaurant」？", a:"结果往往混入高价餐厅或已结业店铺；加上预算、午市、两餸饭、西营盘或坚尼地城等关键词更实用。"}
+];
+
+const DEFAULT_PROMPTS = [
+  "你的名字/花名 + 最想让人记住你的一个特征",
+  "用一个词形容你对香港的第一印象，为什么？",
+  "你最想去香港的哪个地方/地标？为什么？",
+  "你最想在香港吃的一样东西是什么？",
+  "一件你做过最「异闻」的事",
+  "假如你是风水师，你最想给香港哪栋楼看风水？",
+  "你手机里最近一张照片是什么？",
+  "说一件你绝对不敢做的事",
+  "你的 MBTI 或星座是什么？猜中全场给掌声",
+  "用一句粤语（或自创的）向全场打招呼",
+  "你觉得全场谁最像「异闻主角」？为什么？",
+  "如果今晚要在香港过夜，你最想睡在哪里？"
+];
+
+const DEFAULT_CATS = ["动物园","植物园","果园","港铁站名","茶餐厅菜式","风水局 / 避雷针","港岛地标","香港怪谈 / 都市传说","便利店零食","电影里的香港场景"];
+
+const state = {
+  names: LS.get("hoi.names", []),
+  prompts: LS.get("hoi.prompts", DEFAULT_PROMPTS),
+  questions: LS.get("hoi.questions", DEFAULT_QUESTIONS),
+  cats: LS.get("hoi.cats", DEFAULT_CATS),
+  settings: Object.assign({ cd: 10, music: true, sfx: true, hover: true }, LS.get("hoi.settings", {})),
+  usedIntro: LS.get("hoi.usedIntro", []),
+  usedFlower: LS.get("hoi.usedFlower", [])
+};
+function saveNames(){ LS.set("hoi.names", state.names); }
+function savePrompts(){ LS.set("hoi.prompts", state.prompts); }
+function saveQuestions(){ LS.set("hoi.questions", state.questions); }
+function saveCats(){ LS.set("hoi.cats", state.cats); }
+function saveSettings(){ LS.set("hoi.settings", state.settings); }
+function saveUsed(){ LS.set("hoi.usedIntro", state.usedIntro); LS.set("hoi.usedFlower", state.usedFlower); }
+
+/* ---------------- 音效引擎（Web Audio 合成） ---------------- */
+const Snd = (() => {
+  let ctx = null, sfxGain = null, musicGain = null, master = null;
+  function ensure(){
+    if (ctx) { if (ctx.state === "suspended") ctx.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    ctx = new AC();
+    master = ctx.createGain(); master.gain.value = .9; master.connect(ctx.destination);
+    sfxGain = ctx.createGain(); sfxGain.gain.value = 1; sfxGain.connect(master);
+    musicGain = ctx.createGain(); musicGain.gain.value = .5; musicGain.connect(master);
+  }
+  function tone({f=440, f2=null, dur=.1, type="sine", vol=.15, at=0, dest=null}){
+    if (!ctx) return;
+    const t = ctx.currentTime + at;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (f2 != null) o.frequency.exponentialRampToValueAtTime(Math.max(1,f2), t+dur);
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t+.008);
+    g.gain.exponentialRampToValueAtTime(.0001, t+dur);
+    o.connect(g); g.connect(dest || sfxGain);
+    o.start(t); o.stop(t+dur+.02);
+  }
+  function noise({dur=.2, vol=.2, freq=1200, q=1, at=0, sweep=null, dest=null}){
+    if (!ctx) return;
+    const t = ctx.currentTime + at;
+    const len = Math.max(1, Math.floor(ctx.sampleRate*dur));
+    const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i=0;i<len;i++) d[i] = (Math.random()*2-1) * (1 - i/len);
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const f = ctx.createBiquadFilter(); f.type="bandpass"; f.frequency.setValueAtTime(freq, t);
+    if (sweep) f.frequency.exponentialRampToValueAtTime(sweep, t+dur); f.Q.value = q;
+    const g = ctx.createGain(); g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+.01);
+    g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+    src.connect(f); f.connect(g); g.connect(dest || sfxGain);
+    src.start(t); src.stop(t+dur+.02);
+  }
+  const sfx = {
+    click(){ tone({f:880, f2:1320, dur:.06, type:"triangle", vol:.12}); tone({f:1760, dur:.04, type:"sine", vol:.05}); },
+    hover(){ tone({f:620, dur:.03, type:"triangle", vol:.035}); },
+    pop(){ tone({f:520, f2:980, dur:.09, type:"sine", vol:.18}); tone({f:1560, dur:.05, type:"sine", vol:.06}); },
+    open(){ noise({dur:.25, freq:700, sweep:2200, vol:.16, q:1.4}); tone({f:420, f2:880, dur:.22, type:"sine", vol:.1}); },
+    close(){ noise({dur:.22, freq:1800, sweep:400, vol:.13, q:1.2}); tone({f:660, f2:300, dur:.18, type:"sine", vol:.08}); },
+    start(){ noise({dur:.5, freq:300, sweep:2600, vol:.2, q:1.1}); tone({f:180, f2:720, dur:.5, type:"sawtooth", vol:.08}); },
+    stop(){ tone({f:150, f2:40, dur:.45, type:"sine", vol:.4}); noise({dur:.25, freq:900, vol:.22, q:1}); tone({f:60, dur:.3, type:"sine", vol:.3, at:.02}); },
+    tick(){ tone({f:1000, dur:.03, type:"square", vol:.06}); },
+    land(){ tone({f:130, f2:45, dur:.4, type:"sine", vol:.38}); tone({f:523, dur:.12, type:"sine", vol:.16, at:.05});
+           tone({f:659, dur:.14, type:"sine", vol:.16, at:.14}); tone({f:784, dur:.2, type:"sine", vol:.16, at:.23}); },
+    reveal(){ [523,659,784,1047].forEach((f,i)=> tone({f, dur:.28, type:"sine", vol:.16, at:i*.09}));
+              noise({dur:.4, freq:2400, sweep:5000, vol:.06, q:2, at:.1}); },
+    correct(){ [523,587,659,784].forEach((f,i)=> tone({f, dur:.16, type:"triangle", vol:.16, at:i*.07})); },
+    wrong(){ [392,330,262].forEach((f,i)=> tone({f, f2:f*.8, dur:.22, type:"sawtooth", vol:.1, at:i*.1})); },
+    fanfare(){ [523,659,784,1047,1319].forEach((f,i)=> tone({f, dur:.3, type:"sine", vol:.17, at:i*.1}));
+               noise({dur:.7, freq:3000, sweep:9000, vol:.07, q:2.5, at:.2}); },
+    win(){ [523,587,659,784,880,1047].forEach((f,i)=> tone({f, dur:.32, type:"sine", vol:.16, at:i*.12}));
+           noise({dur:1, freq:2500, vol:.06, q:2, at:.3}); noise({dur:1, freq:5000, vol:.05, q:2, at:.5}); },
+    toggle(){ tone({f:660, dur:.07, type:"triangle", vol:.12}); tone({f:880, dur:.09, type:"triangle", vol:.12, at:.06}); },
+    swish(){ noise({dur:.3, freq:600, sweep:3200, vol:.1, q:1.3}); },
+    ding(){ tone({f:1319, dur:.3, type:"sine", vol:.12}); tone({f:1760, dur:.4, type:"sine", vol:.06, at:.05}); }
+  };
+  return {
+    ensure,
+    get musicGain(){ return musicGain; },
+    get ctx(){ return ctx; },
+    setSfx(on){ if (sfxGain) sfxGain.gain.value = on ? 1 : 0; },
+    setMusicVol(v){ if (musicGain) musicGain.gain.value = v; },
+    play(name){ ensure(); if (!state.settings.sfx || !sfx[name]) return; try{ sfx[name](); }catch(e){} }
+  };
+})();
+
+/* ---------------- 背景音乐（内置合成节拍 + 上传音乐） ---------------- */
+const Music = (() => {
+  let mode = "off";         // off | calm | beat
+  let timer = null, step = 0, nextT = 0;
+  let uploaded = null, uploadedURL = null, uploadedEl = null;
+  const BPM = { calm: 92, beat: 134 };
+
+  function sched(){
+    if (!Snd.ctx || mode === "off") return;
+    const now = Snd.ctx.currentTime;
+    const spb = 60 / BPM[mode] / 2;         // 8th notes
+    while (nextT < now + .18){
+      playStep(step, nextT - now);
+      nextT += spb; step++;
+      if (step >= 32) step = 0;
+    }
+  }
+  function playStep(s, at){
+    const bpm = BPM[mode];
+    const beat = s % 4 === 0, off = s % 4 === 2, hat = s % 2 === 0, eHat = s % 8 === 6;
+    const vol = mode === "beat" ? .5 : .32;
+    if (beat) kick(at, vol);
+    if (off && mode === "beat") kick(at, .28);
+    if (hat) hatNoise(at, mode === "beat" ? .12 : .06);
+    if (eHat && mode === "beat") hatNoise(at, .09, 8000);
+    if (mode === "beat" && s % 8 === 4) bass(at);
+  }
+  function kick(at, v){
+    const t = Snd.ctx.currentTime + at;
+    const o = Snd.ctx.createOscillator(), g = Snd.ctx.createGain();
+    o.type = "sine"; o.frequency.setValueAtTime(150, t);
+    o.frequency.exponentialRampToValueAtTime(42, t+.12);
+    g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.0001, t+.16);
+    o.connect(g); g.connect(Snd.musicGain); o.start(t); o.stop(t+.18);
+  }
+  function hatNoise(at, v, freq=6000){
+    const t = Snd.ctx.currentTime + at;
+    const len = Math.floor(Snd.ctx.sampleRate*.05);
+    const buf = Snd.ctx.createBuffer(1,len,Snd.ctx.sampleRate);
+    const d = buf.getChannelData(0);
+    for (let i=0;i<len;i++) d[i] = (Math.random()*2-1)*Math.pow(1-i/len,2);
+    const src = Snd.ctx.createBufferSource(); src.buffer = buf;
+    const f = Snd.ctx.createBiquadFilter(); f.type="highpass"; f.frequency.value = freq;
+    const g = Snd.ctx.createGain(); g.gain.setValueAtTime(v,t); g.gain.exponentialRampToValueAtTime(.0001,t+.05);
+    src.connect(f); f.connect(g); g.connect(Snd.musicGain); src.start(t); src.stop(t+.06);
+  }
+  function bass(at){
+    const t = Snd.ctx.currentTime + at;
+    const o = Snd.ctx.createOscillator(), g = Snd.ctx.createGain();
+    o.type = "triangle"; o.frequency.setValueAtTime(110, t);
+    g.gain.setValueAtTime(.16, t); g.gain.exponentialRampToValueAtTime(.0001, t+.22);
+    o.connect(g); g.connect(Snd.musicGain); o.start(t); o.stop(t+.24);
+  }
+  function startLoop(){
+    stopLoop();
+    step = 0; nextT = Snd.ctx.currentTime + .05;
+    timer = setInterval(sched, 90);
+  }
+  function stopLoop(){ if (timer) clearInterval(timer); timer = null; }
+
+  function refresh(){
+    const want = state.settings.music && mode !== "off";
+    if (want && !uploadedEl && !timer) startLoop();
+    if (!want && !uploadedEl) stopLoop();
+    if (uploadedEl){
+      if (state.settings.music && mode !== "off"){ try{ uploadedEl.play(); }catch(e){} }
+      else uploadedEl.pause();
+    }
+  }
+  async function loadUploaded(){
+    try{
+      const buf = await IDB.get("bgm");
+      if (buf){
+        const blob = new Blob([buf], {type: "audio/*"});
+        uploadedURL = URL.createObjectURL(blob);
+        uploadedEl = new Audio(uploadedURL);
+        uploadedEl.loop = true; uploadedEl.volume = .6;
+        refresh();
+      }
+    }catch(e){}
+  }
+  return {
+    async init(){ await loadUploaded(); },
+    setMode(m){
+      mode = m;
+      if (m === "off"){ stopLoop(); if (uploadedEl) uploadedEl.pause(); return; }
+      Snd.ensure();
+      if (state.settings.music) refresh();
+    },
+    refresh,
+    get mode(){ return mode; },
+    async upload(file){
+      const ab = await file.arrayBuffer();
+      await IDB.put("bgm", ab);
+      if (uploadedURL) URL.revokeObjectURL(uploadedURL);
+      uploadedURL = URL.createObjectURL(new Blob([ab], {type: file.type}));
+      uploadedEl = new Audio(uploadedURL);
+      uploadedEl.loop = true; uploadedEl.volume = .6;
+      refresh();
+    },
+    async removeUpload(){
+      try{ await IDB.del("bgm"); }catch(e){}
+      if (uploadedURL) URL.revokeObjectURL(uploadedURL);
+      uploadedURL = null; uploadedEl = null;
+      refresh();
+    },
+    get hasUpload(){ return !!uploadedEl; }
+  };
+})();
+
+/* ---------------- FX 画布（星空/流萤/波纹/彩带/光标拖尾） ---------------- */
+const FX = (() => {
+  const cv = document.getElementById("fx"), cx = cv.getContext("2d");
+  let W, H, stars = [], embers = [], ripples = [], bursts = [], trail = [], raf;
+  function resize(){
+    W = cv.width = innerWidth * devicePixelRatio;
+    H = cv.height = innerHeight * devicePixelRatio;
+    cv.style.width = innerWidth + "px"; cv.style.height = innerHeight + "px";
+  }
+  function init(){
+    resize(); addEventListener("resize", resize);
+    stars = Array.from({length: 90}, () => ({
+      x: Math.random()*W, y: Math.random()*H, r: (Math.random()*1.6+.3)*devicePixelRatio,
+      ph: Math.random()*Math.PI*2, sp: .4+Math.random()*.9,
+      c: ["255,255,255","216,180,254","244,114,182","167,139,250"][Math.random()*4|0]
+    }));
+    embers = Array.from({length: 26}, () => mkEmber(true));
+    loop();
+  }
+  function mkEmber(anywhere){
+    return { x: Math.random()*W, y: anywhere ? Math.random()*H : H+20, r: (Math.random()*2+1)*devicePixelRatio,
+      vy: -(Math.random()*40+22)*devicePixelRatio, vx: (Math.random()-.5)*14*devicePixelRatio,
+      hue: ["#d62976","#8b5cf6","#f5c542","#22d3ee"][Math.random()*4|0], a: Math.random()*.5+.3 };
+  }
+  function loop(){
+    cx.clearRect(0,0,W,H);
+    const t = performance.now()/1000;
+    for (const s of stars){
+      const a = .25 + .5*(1+Math.sin(t*s.sp+s.ph))/2;
+      cx.beginPath(); cx.arc(s.x, s.y, s.r, 0, 7); cx.fillStyle = `rgba(${s.c},${a})`; cx.fill();
+      s.y += s.sp*devicePixelRatio*.2; if (s.y > H) s.y = 0;
+    }
+    for (const e of embers){
+      e.x += e.vx*.016; e.y += e.vy*.016; e.vx += (Math.random()-.5)*.3;
+      cx.beginPath(); cx.arc(e.x, e.y, e.r, 0, 7);
+      cx.fillStyle = e.hue; cx.globalAlpha = e.a; cx.fill(); cx.globalAlpha = 1;
+      if (e.y < -20){ Object.assign(e, mkEmber(false)); }
+    }
+    ripples = ripples.filter(r => r.a > .02);
+    for (const r of ripples){
+      r.a *= .94; r.r += 3.2*devicePixelRatio;
+      cx.beginPath(); cx.arc(r.x, r.y, r.r, 0, 7);
+      cx.strokeStyle = `rgba(${r.c},${r.a})`; cx.lineWidth = 2*devicePixelRatio; cx.stroke();
+    }
+    bursts = bursts.filter(b => b.life > 0);
+    for (const b of bursts){
+      b.x += b.vx*.06; b.y += b.vy*.06; b.vy += .28; b.life -= .018;
+      cx.globalAlpha = Math.max(0, b.life);
+      cx.fillStyle = b.c; cx.beginPath(); cx.arc(b.x, b.y, b.r*(b.life+.2), 0, 7); cx.fill();
+    }
+    cx.globalAlpha = 1;
+    trail = trail.filter(p => p.a > .05);
+    for (const p of trail){ p.a *= .9; p.r *= .97;
+      cx.globalAlpha = p.a; cx.fillStyle = p.c; cx.beginPath(); cx.arc(p.x, p.y, p.r, 0, 7); cx.fill(); }
+    cx.globalAlpha = 1;
+    raf = requestAnimationFrame(loop);
+  }
+  function ripple(x, y, c="245,197,66"){ ripples.push({x:x*devicePixelRatio, y:y*devicePixelRatio, r:6, a:.7, c}); }
+  function burst(x, y, n=18, colors=["#f5c542","#d62976","#8b5cf6","#22d3ee","#f472b6"]){
+    for (let i=0;i<n;i++){
+      const ang = Math.random()*Math.PI*2, sp = (Math.random()*7+2)*devicePixelRatio;
+      bursts.push({x:x*devicePixelRatio, y:y*devicePixelRatio, vx:Math.cos(ang)*sp, vy:Math.sin(ang)*sp-2, r:(Math.random()*3+1.5)*devicePixelRatio, c:colors[i%colors.length], life:1});
+    }
+  }
+  addEventListener("click", e => { ripple(e.clientX, e.clientY, "214,41,118"); burst(e.clientX, e.clientY, 8); }, {passive:true});
+  let lastT = 0;
+  addEventListener("mousemove", e => {
+    const n = performance.now();
+    if (n - lastT < 24) return; lastT = n;
+    trail.push({x:e.clientX*devicePixelRatio, y:e.clientY*devicePixelRatio, r:(Math.random()*2+1.5)*devicePixelRatio, a:.55, c:["#8b5cf6","#d62976","#f5c542"][Math.random()*3|0]});
+    if (trail.length > 60) trail.shift();
+  }, {passive:true});
+  return { init, burst, ripple };
+})();
+
+/* ---------------- 大转盘组件 ---------------- */
+const Wheel = (() => {
+  const COLORS = ["#7c3aed","#a21caf","#4c1d95","#be185d","#5b21b6","#9d174d"];
+  function make(host, opts = {}){
+    const cv = document.createElement("canvas");
+    cv.className = "wheel-canvas";
+    const rim = document.createElement("div"); rim.className = "wheel-rim";
+    const ptr = document.createElement("div"); ptr.className = "wheel-pointer";
+    const hub = document.createElement("div"); hub.className = "wheel-hub";
+    hub.innerHTML = '<span class="h-ring"></span><span class="h-core">✦</span>';
+    host.classList.add("wheel");
+    host.append(cv, rim, ptr, hub);
+    const cx = cv.getContext("2d");
+    let items = [], rotation = 0, spinning = false, raf = null, lastTickSeg = -1;
+    function dpr(){ return (cv.width / Math.max(1, host.clientWidth)) || 1; }
+    function trunc(s, fs){
+      const maxCh = Math.max(2, Math.floor((host.clientWidth*.24) / fs));
+      return s.length > maxCh ? s.slice(0, maxCh-1) + "…" : s;
+    }
+    function draw(){
+      const w = cv.width; if (!w || !host.clientWidth) return;
+      const c = w/2, R = c - 12*dpr();
+      const n = items.length;
+      cx.clearRect(0,0,w,w);
+      if (!n) return;
+      const seg = Math.PI*2/n;
+      cx.save(); cx.translate(c,c); cx.rotate(rotation);
+      for (let i=0;i<n;i++){
+        cx.beginPath(); cx.moveTo(0,0); cx.arc(0,0,R, i*seg, (i+1)*seg); cx.closePath();
+        cx.fillStyle = COLORS[i%COLORS.length];
+        if (opts.dim && opts.dim(i)) cx.globalAlpha = .32;
+        cx.fill(); cx.globalAlpha = 1;
+        cx.strokeStyle = "rgba(245,197,66,.55)"; cx.lineWidth = 1.5; cx.stroke();
+        cx.save(); cx.rotate(i*seg + seg/2);
+        cx.textAlign = "right"; cx.textBaseline = "middle";
+        const fs = Math.max(10, Math.min(22, R*.115));
+        cx.font = `700 ${fs}px "PingFang HK","Microsoft YaHei",sans-serif`;
+        cx.fillStyle = "#fff";
+        cx.shadowColor = "rgba(0,0,0,.9)"; cx.shadowBlur = 4;
+        const label = opts.label ? opts.label(i) : String(items[i]);
+        cx.fillText(trunc(label, fs), R-10*dpr(), 0);
+        cx.restore();
+      }
+      cx.restore();
+      cx.beginPath(); cx.arc(c,c,c*.27,0,7);
+      cx.fillStyle = "rgba(10,6,22,.88)"; cx.fill();
+      cx.strokeStyle = "rgba(245,197,66,.55)"; cx.lineWidth = 2*dpr(); cx.stroke();
+    }
+    function resize(){
+      const d = devicePixelRatio||1;
+      const s = Math.max(40, Math.floor(host.clientWidth*d));
+      cv.width = s; cv.height = s;
+      cv.style.width = host.clientWidth+"px"; cv.style.height = host.clientWidth+"px";
+      draw();
+    }
+    function spin(){
+      if (spinning || !items.length) return Promise.resolve(-1);
+      spinning = true; host.classList.add("spinning");
+      const n = items.length, seg = Math.PI*2/n;
+      const idx = Math.floor(Math.random()*n);
+      const turns = 5 + Math.floor(Math.random()*3);
+      let delta = -Math.PI/2 - (idx+.5)*seg - rotation;
+      delta = ((delta % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
+      const target = rotation + Math.PI*2*turns + delta;
+      const start = rotation, dur = 4200, t0 = performance.now();
+      lastTickSeg = -1;
+      return new Promise(res => {
+        function frame(now){
+          const p = Math.min(1, (now-t0)/dur);
+          const e = 1 - Math.pow(1-p, 5);
+          rotation = start + (target-start)*e;
+          draw();
+          const curSeg = Math.floor(((((rotation % (Math.PI*2)) + Math.PI*2) % (Math.PI*2)))/seg);
+          if (curSeg !== lastTickSeg){ lastTickSeg = curSeg; Snd.play("tick"); }
+          if (p < 1){ raf = requestAnimationFrame(frame); }
+          else {
+            spinning = false; host.classList.remove("spinning");
+            Snd.play("land");
+            const rect = host.getBoundingClientRect();
+            FX.burst(rect.left + rect.width/2, rect.top + rect.height/2, 26);
+            if (opts.onStop) opts.onStop(idx);
+            res(idx);
+          }
+        }
+        raf = requestAnimationFrame(frame);
+      });
+    }
+    function setItems(arr){
+      items = arr.slice();
+      if (spinning){ spinning = false; cancelAnimationFrame(raf); host.classList.remove("spinning"); }
+      resize();
+    }
+    function destroy(){ cancelAnimationFrame(raf); host.innerHTML = ""; }
+    return { setItems, spin, resize, destroy, get spinning(){ return spinning; }, get count(){ return items.length; } };
+  }
+  return { make };
+})();
+
+/* ---------------- 工具 ---------------- */
+const $ = s => document.querySelector(s);
+function toast(msg, ms=2200){
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._timer); t._timer = setTimeout(() => t.classList.remove("show"), ms);
+}
+function shuffle(a){ a = a.slice(); for (let i=a.length-1;i>0;i--){ const j = Math.random()*(i+1)|0; [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function pick(a){ return a[Math.random()*a.length|0]; }
+function esc(s){ return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m])); }
+
+/* ---------------- 视图切换 ---------------- */
+function go(id){
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  const el = document.getElementById("view-"+id);
+  if (!el) return;
+  el.classList.add("active");
+  window.scrollTo({top:0});
+  Snd.play("open");
+  if (id === "intro"){ renderIntro(); if (introWheel) introWheel.resize(); }
+  if (id === "games"){ renderFlower(); if (qWheel) qWheel.resize(); }
+  if (id === "names") renderNames();
+}
+document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(b.dataset.go)));
+
+/* ---------------- 名单管理 ---------------- */
+const nameInput = $("#nameInput"), nameChips = $("#nameChips"), nameCount = $("#nameCount");
+function renderNames(){
+  nameChips.innerHTML = "";
+  state.names.forEach((n, i) => {
+    const chip = document.createElement("div");
+    chip.className = "chip";
+    chip.style.animationDelay = Math.min(i*30, 600)+"ms";
+    const span = document.createElement("span");
+    span.textContent = n;
+    span.title = "点击编辑";
+    const x = document.createElement("span");
+    x.className = "x"; x.textContent = "✕"; x.title = "删除";
+    x.addEventListener("click", e => { e.stopPropagation(); Snd.play("pop"); state.names.splice(i,1); saveNames(); renderNames(); });
+    span.addEventListener("click", () => editChip(chip, span, i));
+    chip.append(span, x);
+    nameChips.append(chip);
+  });
+  nameCount.textContent = `共 ${state.names.length} 人` + (state.names.length ? " · 点击名字可编辑，点 ✕ 删除" : "");
+}
+function editChip(chip, span, i){
+  const inp = document.createElement("input");
+  inp.className = "field"; inp.style.padding = "4px 10px"; inp.style.fontSize = "14px";
+  inp.value = state.names[i]; inp.maxLength = 12;
+  span.replaceWith(inp); inp.focus(); inp.select();
+  let done = false;
+  const commit = () => {
+    if (done) return; done = true;
+    const v = inp.value.trim();
+    if (v){ state.names[i] = v; saveNames(); Snd.play("pop"); }
+    renderNames();
+  };
+  inp.addEventListener("blur", commit);
+  inp.addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); commit(); } if (e.key === "Escape"){ done = true; renderNames(); } });
+}
+function addName(v){
+  v = (v||"").trim();
+  if (!v) return;
+  if (state.names.includes(v)){ toast("「"+v+"」已经在名单里了"); return; }
+  state.names.push(v); saveNames(); renderNames(); Snd.play("pop");
+}
+$("#nameAdd").addEventListener("click", () => { addName(nameInput.value); nameInput.value = ""; nameInput.focus(); });
+nameInput.addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); addName(nameInput.value); nameInput.value = ""; } });
+$("#nameBulk").addEventListener("click", () => {
+  const raw = $("#namePaste").value;
+  const parts = raw.split(/[\n\r、，,;；]+/).map(s => s.trim()).filter(Boolean);
+  if (!parts.length){ toast("请先粘贴名单，每行一个名字"); return; }
+  let added = 0;
+  parts.forEach(p => { if (!state.names.includes(p)){ state.names.push(p); added++; } });
+  saveNames(); renderNames();
+  Snd.play("pop");
+  toast(`已导入 ${added} 人（跳过重复）`);
+  $("#namePaste").value = "";
+});
+$("#nameClear").addEventListener("click", () => {
+  if (!state.names.length) return;
+  if (!confirm("确定清空全部名单？")) return;
+  state.names = []; saveNames(); renderNames(); Snd.play("close"); toast("名单已清空");
+});
+$("#nameShuffle").addEventListener("click", () => { state.names = shuffle(state.names); saveNames(); renderNames(); Snd.play("swish"); toast("已随机排序"); });
+
+/* ---------------- 自我介绍 · 大转盘点名 ---------------- */
+let introWheel = null, introPrompt = "";
+const introWho = $("#introWho"), introPromptEl = $("#introPrompt"), introReveal = $("#introReveal");
+function renderIntro(){
+  const count = state.usedIntro.length;
+  $("#introCount").textContent = `已介绍 ${count} / ${state.names.length}`;
+  if (!introWheel){
+    introWheel = Wheel.make($("#introWheel"), {
+      label: i => state.names[i] || "",
+      dim: i => state.usedIntro.includes(state.names[i]),
+      onStop: idx => onIntroLand(idx)
+    });
+  }
+  introWheel.setItems(state.names);
+}
+function onIntroLand(idx){
+  const name = state.names[idx];
+  if (name == null) return;
+  const wasUsed = state.usedIntro.includes(name);
+  if (!wasUsed){ state.usedIntro.push(name); saveUsed(); renderIntro(); }
+  introPrompt = pick(state.prompts) || "介绍一下你自己吧";
+  introWho.textContent = name;
+  introPromptEl.textContent = "✧ " + introPrompt;
+  introReveal.style.display = "block";
+  introReveal.scrollIntoView({behavior:"smooth", block:"center"});
+  Snd.play("fanfare");
+  const r = introReveal.getBoundingClientRect();
+  FX.burst(r.left + r.width/2, r.top + 40, 30);
+  toast(wasUsed ? "这位已经介绍过啦～ 可以再认识一次！" : "恭喜被点名！");
+}
+$("#introSpin").addEventListener("click", () => {
+  if (!state.names.length){ toast("请先在「名单管理」添加参与者"); return; }
+  Snd.play("start");
+  introWheel.spin();
+});
+$("#introNext").addEventListener("click", () => {
+  if (!state.names.length) return;
+  introPrompt = pick(state.prompts) || "介绍一下你自己吧";
+  introPromptEl.textContent = "✧ " + introPrompt;
+  Snd.play("pop");
+});
+$("#introReset").addEventListener("click", () => {
+  state.usedIntro = []; saveUsed(); renderIntro(); introReveal.style.display = "none";
+  Snd.play("close"); toast("已重置「已介绍」状态");
+});
+
+/* ---------------- 击鼓传花 ---------------- */
+let flowerTimer = null, flowerIdx = -1, flowerDir = 1, flowerRunning = false;
+const flowerGrid = $("#flowerGrid");
+function renderFlower(){
+  flowerGrid.innerHTML = "";
+  state.names.forEach((n, i) => {
+    const t = document.createElement("div");
+    t.className = "tile" + (state.usedFlower.includes(n) ? " used" : "");
+    t.innerHTML = `<span class="no">${String(i+1).padStart(2,"0")}</span>${esc(n)}`;
+    t.addEventListener("click", () => {
+      Snd.play("toggle");
+      if (state.usedFlower.includes(n)) state.usedFlower = state.usedFlower.filter(x => x !== n);
+      else state.usedFlower.push(n);
+      saveUsed(); renderFlower();
+    });
+    flowerGrid.append(t);
+  });
+  $("#flowerCount").textContent = `已答 ${state.usedFlower.length} / ${state.names.length}`;
+}
+function sweep(){
+  if (flowerTimer) clearInterval(flowerTimer);
+  flowerTimer = setInterval(() => {
+    const n = state.names.length; if (!n) return;
+    if (Math.random() < .08) flowerDir *= -1;
+    flowerIdx = (flowerIdx + flowerDir + n) % n;
+    document.querySelectorAll("#flowerGrid .tile").forEach((t, i) => t.classList.toggle("hot", i === flowerIdx));
+  }, 90);
+}
+function stopFlower(){
+  clearInterval(flowerTimer); flowerTimer = null;
+  flowerRunning = false;
+  $("#flowerStart").disabled = false; $("#flowerStop").disabled = true;
+  $("#flowerLive").style.background = "var(--jade)";
+  $("#flowerBars").style.display = "none";
+  Music.setMode(state.settings.music ? "calm" : "off");
+  Snd.play("stop");
+  if (flowerIdx >= 0 && flowerIdx < state.names.length){
+    const name = state.names[flowerIdx];
+    if (!state.usedFlower.includes(name)){ state.usedFlower.push(name); saveUsed(); }
+    renderFlower();
+    document.querySelectorAll("#flowerGrid .tile").forEach((t, i) => {
+      if (state.names[i] === name){
+        t.classList.add("picked");
+        const r = t.getBoundingClientRect();
+        FX.burst(r.left + r.width/2, r.top + r.height/2, 26);
+        t.scrollIntoView({behavior:"smooth", block:"center"});
+      }
+    });
+    toast(`🎯 ${name} 被传到了！转动大转盘抽取惩罚题吧`);
+    document.getElementById("qWheel").scrollIntoView({behavior:"smooth", block:"center"});
+  } else toast("名单为空，请先添加参与者");
+}
+$("#flowerStart").addEventListener("click", () => {
+  if (!state.names.length){ toast("请先在「名单管理」添加参与者"); return; }
+  if (flowerRunning) return;
+  flowerRunning = true;
+  $("#flowerStart").disabled = true; $("#flowerStop").disabled = false;
+  $("#flowerLive").style.background = "var(--red)";
+  $("#flowerBars").style.display = "inline-flex";
+  document.querySelectorAll("#flowerGrid .tile").forEach(t => t.classList.remove("picked"));
+  flowerIdx = Math.floor(Math.random()*state.names.length);
+  Music.setMode("beat");
+  Snd.play("start");
+  sweep();
+});
+$("#flowerStop").addEventListener("click", stopFlower);
+
+/* ---------------- 逛三园 ---------------- */
+let cdTimer = null, cdLeft = 0, cdTotal = 10, cdLastSec = -1;
+let gardenCat = "";
+function renderGarden(){
+  if (!gardenCat || !state.cats.includes(gardenCat)){
+    gardenCat = state.cats[Math.random()*state.cats.length|0] || "动物园";
+  }
+  $("#gardenCat").textContent = gardenCat;
+}
+function setCd(n){
+  cdLeft = n; cdTotal = n;
+  $("#cdNum").textContent = Math.ceil(n);
+  $("#cdFill").style.strokeDashoffset = 0;
+}
+function cdTick(){
+  cdLeft -= .1;
+  if (cdLeft <= 0){
+    clearInterval(cdTimer); cdTimer = null;
+    $("#gardenStart").disabled = false; $("#gardenPause").textContent = "⏸ 暂停";
+    $("#gardenLive").style.background = "var(--red)";
+    Snd.play("wrong");
+    $("#gardenStage").style.boxShadow = "0 0 60px rgba(251,113,133,.5)";
+    setTimeout(() => $("#gardenStage").style.boxShadow = "", 900);
+    toast("⏰ 时间到！接不上的人要转盘答题啦");
+    return;
+  }
+  const sec = Math.ceil(cdLeft);
+  $("#cdNum").textContent = sec;
+  $("#cdFill").style.strokeDashoffset = 528 * (1 - cdLeft/cdTotal);
+  if (sec !== cdLastSec){ cdLastSec = sec; Snd.play("tick"); }
+}
+$("#gardenStart").addEventListener("click", () => {
+  if (!state.cats.length){ toast("请先在设置里添加类别"); return; }
+  if (cdTimer){ clearInterval(cdTimer); }
+  setCd(state.settings.cd);
+  cdLastSec = -1;
+  $("#gardenStart").disabled = true; $("#gardenPause").textContent = "⏸ 暂停";
+  $("#gardenLive").style.background = "var(--jade)";
+  Snd.play("start");
+  cdTimer = setInterval(cdTick, 100);
+});
+$("#gardenPause").addEventListener("click", () => {
+  if (cdTimer){
+    clearInterval(cdTimer); cdTimer = null;
+    $("#gardenPause").textContent = "▶️ 继续";
+    $("#gardenLive").style.background = "var(--gold)";
+    Snd.play("close");
+  } else {
+    if (cdLeft <= 0) setCd(state.settings.cd);
+    cdLastSec = -1;
+    $("#gardenPause").textContent = "⏸ 暂停";
+    $("#gardenLive").style.background = "var(--jade)";
+    Snd.play("start");
+    cdTimer = setInterval(cdTick, 100);
+  }
+});
+$("#gardenCatNext").addEventListener("click", () => {
+  if (!state.cats.length) return;
+  let next;
+  do { next = pick(state.cats); } while (state.cats.length > 1 && next === gardenCat);
+  gardenCat = next; renderGarden();
+  Snd.play("swish"); toast("类别：" + gardenCat);
+});
+$("#gardenFail").addEventListener("click", () => {
+  Snd.play("wrong");
+  document.getElementById("qWheel").scrollIntoView({behavior:"smooth", block:"center"});
+  toast("这位同学要转动大转盘抽取惩罚题啦");
+});
+
+/* ---------------- 大转盘 · 惩罚题 ---------------- */
+let qWheel = null, curQ = null;
+function renderQWheel(){
+  if (!qWheel){
+    qWheel = Wheel.make($("#qWheel"), {
+      label: i => String((i+1)),
+      onStop: idx => openQuestion(idx)
+    });
+  }
+  qWheel.setItems(state.questions);
+}
+function openQuestion(idx){
+  const q = state.questions[idx];
+  if (!q) return;
+  curQ = q;
+  $("#qGroup").textContent = q.g ? "组别 · " + q.g : "惩罚题";
+  const tag = $("#qTag");
+  tag.textContent = q.t || "随机";
+  tag.className = "q-tag" + (q.t ? " gold" : "");
+  $("#qText").textContent = q.q;
+  $("#qAnswer").textContent = q.a;
+  $("#qAnswer").classList.remove("show");
+  $("#qModal").classList.add("open");
+  Snd.play("open");
+}
+function closeQ(){ $("#qModal").classList.remove("open"); Snd.play("close"); }
+$("#qSpin").addEventListener("click", () => {
+  if (!state.questions.length){ toast("题库为空，请到设置中恢复默认题库"); return; }
+  Snd.play("start");
+  qWheel.spin();
+});
+$("#qReveal").addEventListener("click", () => {
+  $("#qAnswer").classList.add("show");
+  Snd.play("reveal");
+  const r = $("#qAnswer").getBoundingClientRect();
+  FX.burst(r.left + r.width/2, r.top + r.height/2, 22, ["#f5c542","#22d3ee","#34d399"]);
+});
+$("#qNext").addEventListener("click", () => {
+  closeQ();
+  setTimeout(() => { if (qWheel) qWheel.spin(); }, 260);
+});
+$("#qClose").addEventListener("click", closeQ);
+$("#qClose2").addEventListener("click", closeQ);
+
+/* ---------------- 顶部栏 / 设置 ---------------- */
+function toggleFullscreen(){
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+  else document.exitFullscreen?.();
+}
+$("#btnFull").addEventListener("click", () => { toggleFullscreen(); Snd.play("toggle"); });
+$("#btnMusic").addEventListener("click", () => {
+  state.settings.music = !state.settings.music; saveSettings(); updateTopButtons();
+  if (state.settings.music){ Snd.ensure(); Music.setMode(flowerRunning ? "beat" : "calm"); Snd.play("toggle"); toast("音乐已开启"); }
+  else { Music.setMode("off"); Snd.play("close"); toast("音乐已关闭"); }
+});
+$("#btnSfx").addEventListener("click", () => {
+  state.settings.sfx = !state.settings.sfx; saveSettings(); updateTopButtons(); Snd.setSfx(state.settings.sfx);
+  if (state.settings.sfx) Snd.play("toggle");
+});
+function updateTopButtons(){
+  const m = $("#btnMusic"), s = $("#btnSfx");
+  m.classList.toggle("off", !state.settings.music);
+  s.classList.toggle("off", !state.settings.sfx);
+  m.querySelector(".lbl").textContent = state.settings.music ? "音乐" : "音乐:关";
+  s.querySelector(".lbl").textContent = state.settings.sfx ? "音效" : "音效:关";
+  const hint = $("#musicHint");
+  hint.textContent = Music.hasUpload ? "已上传背景音乐（循环播放）" : "内置合成节拍";
+}
+$("#btnSettings").addEventListener("click", openSettings);
+$("#setClose").addEventListener("click", closeSettings);
+$("#setDone").addEventListener("click", closeSettings);
+function openSettings(){
+  $("#editPrompts").value = state.prompts.join("\n");
+  $("#editQuestions").value = state.questions.map(q => (q.t ? "[情境] " : "") + q.q + " | " + q.a).join("\n");
+  $("#editCats").value = state.cats.join("\n");
+  $("#cdVal").textContent = state.settings.cd + " 秒";
+  $("#setModal").classList.add("open");
+  Snd.play("open");
+}
+function closeSettings(){ $("#setModal").classList.remove("open"); Snd.play("close"); }
+$("#cdMinus").addEventListener("click", () => { state.settings.cd = Math.max(5, state.settings.cd-1); saveSettings(); $("#cdVal").textContent = state.settings.cd+" 秒"; Snd.play("pop"); });
+$("#cdPlus").addEventListener("click", () => { state.settings.cd = Math.min(30, state.settings.cd+1); saveSettings(); $("#cdVal").textContent = state.settings.cd+" 秒"; Snd.play("pop"); });
+$("#savePrompts").addEventListener("click", () => {
+  state.prompts = $("#editPrompts").value.split("\n").map(s=>s.trim()).filter(Boolean);
+  savePrompts(); Snd.play("ding"); toast("提示题库已保存（"+state.prompts.length+" 条）");
+});
+$("#saveQuestions").addEventListener("click", () => {
+  const out = [];
+  $("#editQuestions").value.split("\n").map(s=>s.trim()).filter(Boolean).forEach(line => {
+    let t = ""; let body = line;
+    if (body.startsWith("[情境]")){ t = "情境题"; body = body.slice(4).trim(); }
+    const i = body.indexOf("|");
+    if (i < 0){ out.push({g:"自定义", t, q:body, a:""}); return; }
+    out.push({g:"自定义", t, q:body.slice(0,i).trim(), a:body.slice(i+1).trim()});
+  });
+  state.questions = out; saveQuestions(); Snd.play("ding");
+  renderQWheel(); toast("题库已保存（"+out.length+" 题）");
+});
+$("#restoreQuestions").addEventListener("click", () => {
+  state.questions = DEFAULT_QUESTIONS.map(q => ({...q})); saveQuestions(); renderQWheel();
+  $("#editQuestions").value = state.questions.map(q => (q.t ? "[情境] " : "") + q.q + " | " + q.a).join("\n");
+  Snd.play("ding"); toast("已恢复默认题库（30 题）");
+});
+$("#saveCats").addEventListener("click", () => {
+  state.cats = $("#editCats").value.split("\n").map(s=>s.trim()).filter(Boolean);
+  saveCats(); renderGarden(); Snd.play("ding"); toast("类别已保存（"+state.cats.length+" 个）");
+});
+$("#musicFile").addEventListener("change", async e => {
+  const f = e.target.files[0]; if (!f) return;
+  if (f.size > 20*1024*1024){ toast("文件太大（限 20MB）"); return; }
+  try{
+    await Music.upload(f);
+    state.settings.music = true; saveSettings(); updateTopButtons();
+    Snd.play("ding"); toast("已上传背景音乐：" + f.name);
+  }catch(err){ toast("上传失败：" + err.message); }
+  e.target.value = "";
+});
+$("#musicRemove").addEventListener("click", async () => {
+  await Music.removeUpload(); updateTopButtons(); Snd.play("pop"); toast("已移除上传音乐，恢复内置节拍");
+});
+$("#exportData").addEventListener("click", () => {
+  const data = { names: state.names, prompts: state.prompts, questions: state.questions, cats: state.cats, settings: state.settings, usedIntro: state.usedIntro, usedFlower: state.usedFlower };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "异闻录破冰数据.json"; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  Snd.play("ding"); toast("已导出数据");
+});
+$("#importData").addEventListener("click", () => $("#importFile").click());
+$("#importFile").addEventListener("change", e => {
+  const f = e.target.files[0]; if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => {
+    try{
+      const d = JSON.parse(rd.result);
+      if (Array.isArray(d.names)) state.names = d.names;
+      if (Array.isArray(d.prompts)) state.prompts = d.prompts;
+      if (Array.isArray(d.questions)) state.questions = d.questions;
+      if (Array.isArray(d.cats)) state.cats = d.cats;
+      if (d.settings) Object.assign(state.settings, d.settings);
+      if (Array.isArray(d.usedIntro)) state.usedIntro = d.usedIntro;
+      if (Array.isArray(d.usedFlower)) state.usedFlower = d.usedFlower;
+      saveNames(); savePrompts(); saveQuestions(); saveCats(); saveSettings(); saveUsed();
+      renderNames(); renderIntro(); renderFlower(); renderGarden(); renderQWheel(); updateTopButtons();
+      Snd.play("ding"); toast("数据已导入");
+    }catch(err){ toast("导入失败：文件格式不正确"); }
+  };
+  rd.readAsText(f);
+  e.target.value = "";
+});
+$("#resetAll").addEventListener("click", () => {
+  if (!confirm("确定要重置全部数据吗？名单、题库、设置都会被清空。")) return;
+  ["hoi.names","hoi.prompts","hoi.questions","hoi.cats","hoi.settings","hoi.usedIntro","hoi.usedFlower"].forEach(k => localStorage.removeItem(k));
+  location.reload();
+});
+
+/* ---------------- 全局点击/悬停音效 ---------------- */
+document.addEventListener("click", e => {
+  const t = e.target.closest("button, .gcard, .tab, .chip, .tile");
+  if (!t) return;
+  if (t.hasAttribute("data-nosfx")) return;
+  Snd.play("click");
+});
+let hoverLast = null;
+document.addEventListener("pointerover", e => {
+  const t = e.target.closest("button, .gcard, .tab, .chip, .tile");
+  if (!t || t === hoverLast) return; hoverLast = t;
+  if (state.settings.hover) Snd.play("hover");
+});
+
+/* ---------------- 键盘快捷键 ---------------- */
+document.addEventListener("keydown", e => {
+  const qOpen = $("#qModal").classList.contains("open");
+  const sOpen = $("#setModal").classList.contains("open");
+  if (e.key === "Escape"){ if (qOpen) closeQ(); if (sOpen) closeSettings(); return; }
+  if (e.key.toLowerCase() === "f"){ toggleFullscreen(); return; }
+  if (e.key === "Enter"){
+    if (qOpen){ if (!$("#qAnswer").classList.contains("show")) $("#qReveal").click(); else $("#qNext").click(); e.preventDefault(); }
+    return;
+  }
+  if (e.code === "Space"){
+    if (qOpen){ if (!$("#qAnswer").classList.contains("show")) $("#qReveal").click(); else $("#qNext").click(); }
+    else if (sOpen) return;
+    else if (document.getElementById("view-games").classList.contains("active")){
+      const onFlower = document.getElementById("sub-flower").style.display !== "none";
+      if (onFlower){ if (flowerRunning) stopFlower(); else $("#flowerStart").click(); }
+      else { if (cdTimer) $("#gardenPause").click(); else $("#gardenStart").click(); }
+    }
+    else if (document.getElementById("view-intro").classList.contains("active")){
+      if (!introWheel.spinning) $("#introSpin").click();
+    }
+    e.preventDefault();
+  }
+});
+
+/* ---------------- 标签切换（逛三园/击鼓传花） ---------------- */
+document.querySelectorAll(".tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    tab.classList.add("active");
+    const id = "sub-" + tab.dataset.tab;
+    document.querySelectorAll(".subview").forEach(v => v.style.display = "none");
+    document.getElementById(id).style.display = "";
+    Snd.play("pop");
+    if (id === "sub-flower") renderFlower();
+    else renderGarden();
+  });
+});
+
+/* ---------------- 初始化 ---------------- */
+document.addEventListener("pointerdown", () => {
+  Snd.ensure();
+  Snd.setSfx(state.settings.sfx);
+  Music.init().then(() => {
+    if (state.settings.music && !Music.hasUpload) Music.setMode("calm");
+  });
+}, {once:true});
+
+addEventListener("resize", () => {
+  if (introWheel && document.getElementById("view-intro").classList.contains("active")) introWheel.resize();
+  if (qWheel && document.getElementById("view-games").classList.contains("active")) qWheel.resize();
+});
+
+function init(){
+  FX.init();
+  renderNames(); renderIntro(); renderFlower(); renderGarden(); renderQWheel();
+  updateTopButtons();
+  document.getElementById("sub-flower").style.display = "";
+  document.getElementById("sub-garden").style.display = "none";
+}
+init();
+</script>
+</body>
+</html>
