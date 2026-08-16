@@ -460,9 +460,9 @@
       <div class="panel">
         <h3><span class="dot"></span>玩法规则</h3>
         <ol class="rules">
-          <li>屏幕显示类别（如「动物园」），每人轮流说出一个该类别的事物，不能重复。</li>
-          <li>倒计时结束还接不上，或说了重复/错误的，即被淘汰。</li>
-          <li>淘汰的同学转动大转盘抽取惩罚题并回答。</li>
+          <li>先转动「三园转盘」决定本轮逛哪个园（动物园 / 植物园 / 港铁站名……），类别可编辑。</li>
+          <li>每人轮流说出一个该类别的事物，不能重复；倒计时结束还接不上，或说了重复/错误的，即被淘汰。</li>
+          <li>被淘汰的同学转动下方大转盘抽取惩罚题并回答。</li>
         </ol>
       </div>
       <div class="stage" id="gardenStage">
@@ -470,6 +470,14 @@
           <div class="stage-title">🌳 逛三园 <span class="live" id="gardenLive"></span></div>
           <button class="btn ghost small" id="gardenCatNext">🎲 换类别</button>
         </div>
+        <div class="cat-wheel-block">
+          <div id="catWheel" class="wheel-host cat-wheel"></div>
+          <div class="stage-actions" style="margin-top:4px">
+            <button class="btn gold" id="catSpin">🎡 转盘决定逛哪个园</button>
+            <button class="btn ghost" id="gardenCatNext">🎲 随机换一个</button>
+          </div>
+        </div>
+        <div class="divider"></div>
         <div class="cd-wrap">
           <div class="cat-name" id="gardenCat">动物园</div>
           <div class="cat-sub">轮流接龙 · 不许重复 · 接不上就转盘答题</div>
@@ -495,7 +503,7 @@
 
     <div class="panel" style="margin-top:22px">
       <h3><span class="dot"></span>🎡 大转盘 · 抽取惩罚题</h3>
-      <p class="sub">被传到 / 接不上的人，转动下方大转盘抽取一道惩罚题；指针停下后自动弹出题目，由主持人决定是否揭晓答案。</p>
+      <p class="sub">击鼓传花被传到、或逛三园被淘汰的同学，转动下方大转盘抽取一道惩罚题；指针停下后自动弹出题目，由主持人决定是否揭晓答案。</p>
       <div id="qWheel" class="wheel-host"></div>
       <div class="stage-actions">
         <button class="btn big gold" id="qSpin">🎡 转动转盘抽题</button>
@@ -629,6 +637,8 @@
   .wheel-hub .h-core{font-size:30px;filter:drop-shadow(0 0 10px rgba(245,197,66,.9));animation:hubPulse 2s ease-in-out infinite}
   @keyframes hubPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
   .wheel.spinning .wheel-canvas{filter:drop-shadow(0 0 26px rgba(214,41,118,.55))}
+  .cat-wheel{width:min(100%,340px)!important;margin:6px auto}
+  .cat-wheel-block{text-align:center}
 </style>
 <script>
 "use strict";
@@ -1107,7 +1117,7 @@ function go(id){
   window.scrollTo({top:0});
   Snd.play("open");
   if (id === "intro"){ renderIntro(); if (introWheel) introWheel.resize(); }
-  if (id === "games"){ renderFlower(); if (qWheel) qWheel.resize(); }
+  if (id === "games"){ renderFlower(); renderGarden(); if (qWheel) qWheel.resize(); if (catWheel) catWheel.resize(); }
   if (id === "names") renderNames();
 }
 document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(b.dataset.go)));
@@ -1289,12 +1299,36 @@ $("#flowerStop").addEventListener("click", stopFlower);
 /* ---------------- 逛三园 ---------------- */
 let cdTimer = null, cdLeft = 0, cdTotal = 10, cdLastSec = -1;
 let gardenCat = "";
+function restartCatAnim(){
+  const el = $("#gardenCat");
+  el.style.animation = "none"; void el.offsetWidth; el.style.animation = "";
+}
+let catWheel = null;
 function renderGarden(){
   if (!gardenCat || !state.cats.includes(gardenCat)){
     gardenCat = state.cats[Math.random()*state.cats.length|0] || "动物园";
   }
   $("#gardenCat").textContent = gardenCat;
+  if (!catWheel){
+    catWheel = Wheel.make($("#catWheel"), {
+      label: i => state.cats[i] || "",
+      onStop: idx => {
+        const c = state.cats[idx];
+        if (c == null) return;
+        gardenCat = c;
+        $("#gardenCat").textContent = c;
+        restartCatAnim();
+        toast("本轮逛：「" + c + "」！");
+      }
+    });
+  }
+  catWheel.setItems(state.cats);
 }
+$("#catSpin").addEventListener("click", () => {
+  if (!state.cats.length){ toast("请先在设置里添加类别"); return; }
+  Snd.play("start");
+  catWheel.spin();
+});
 function setCd(n){
   cdLeft = n; cdTotal = n;
   $("#cdNum").textContent = Math.ceil(n);
@@ -1346,7 +1380,7 @@ $("#gardenCatNext").addEventListener("click", () => {
   if (!state.cats.length) return;
   let next;
   do { next = pick(state.cats); } while (state.cats.length > 1 && next === gardenCat);
-  gardenCat = next; renderGarden();
+  gardenCat = next; renderGarden(); restartCatAnim();
   Snd.play("swish"); toast("类别：" + gardenCat);
 });
 $("#gardenFail").addEventListener("click", () => {
@@ -1560,7 +1594,7 @@ document.querySelectorAll(".tab").forEach(tab => {
     document.getElementById(id).style.display = "";
     Snd.play("pop");
     if (id === "sub-flower") renderFlower();
-    else renderGarden();
+    else { renderGarden(); if (catWheel) catWheel.resize(); }
   });
 });
 
@@ -1576,6 +1610,7 @@ document.addEventListener("pointerdown", () => {
 addEventListener("resize", () => {
   if (introWheel && document.getElementById("view-intro").classList.contains("active")) introWheel.resize();
   if (qWheel && document.getElementById("view-games").classList.contains("active")) qWheel.resize();
+  if (catWheel && document.getElementById("view-games").classList.contains("active") && document.getElementById("sub-garden").style.display !== "none") catWheel.resize();
 });
 
 function init(){
